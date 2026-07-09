@@ -221,13 +221,65 @@ body.dark .combo-controls { background: rgba(255,255,255,0.02); }
 body.dark .fert-row { background: rgba(255,255,255,0.02); }
 
 /* ========== RESPONSIVE ========== */
+/* Tablet */
 @media (max-width: 900px) {
   .flex-row { flex-direction: column; }
   .flex-1, .flex-2 { min-width: 100%; }
-  .combo-controls { flex-direction: column; }
-  .header { padding-top: 12px; }
+  .header { padding: 14px 14px 0; }
   .header h1 { font-size: 19px; }
   .tab-btn { padding: 8px 14px; font-size: 13px; }
+  .content-area { padding: 14px; }
+}
+
+/* Phone */
+@media (max-width: 640px) {
+  body { padding: 0; }
+
+  .header { padding: 10px 10px 0; flex-direction: column; gap: 6px; align-items: flex-start; }
+  .header h1 { font-size: 17px; }
+  .header-right { width: 100%; }
+  .theme-btn { font-size: 12px; padding: 5px 12px; }
+
+  .tab-nav { padding: 0 8px; gap: 0; }
+  .tab-btn { padding: 8px 10px; font-size: 12px; letter-spacing: -0.2px; }
+
+  .content-area { padding: 8px; }
+
+  .panel { padding: 14px 10px; border-radius: 8px; margin-bottom: 10px; }
+  .panel h2 { font-size: 15px; margin-bottom: 10px; }
+
+  .form-group { margin-bottom: 10px; }
+  .form-group label { font-size: 11px; }
+  .form-group select, .form-group input { padding: 8px 10px; font-size: 13px; }
+
+  table { font-size: 11px; }
+  th, td { padding: 6px 5px; }
+  th { font-size: 10px; }
+
+  .highlight { font-size: inherit; }
+  td.global-best { font-size: 11px; }
+
+  .combo-controls { flex-wrap: nowrap; overflow-x: auto; gap: 6px; padding: 10px; -webkit-overflow-scrolling: touch; }
+  .combo-controls .control-item { min-width: 60px; }
+  .combo-controls select { width: 60px; font-size: 11px; padding: 5px 4px; }
+  .combo-controls label { font-size: 10px; }
+
+  .thief-plot { gap: 5px; margin-bottom: 4px; }
+  .thief-plot select { min-width: 130px !important; font-size: 12px; padding: 7px 8px; }
+  .thief-plot input { width: 55px !important; font-size: 12px; padding: 7px 6px; }
+  .thief-plot span { font-size: 11px !important; }
+
+  hr { margin: 12px 0; }
+
+  .layout-diagram { font-size: 10px; padding: 8px; }
+
+  #thiefSummary { font-size: 13px !important; padding: 12px !important; }
+  #thiefSummary strong { font-size: 18px !important; }
+
+  .note { font-size: 11px; }
+
+  /* Smaller scrollbar for mobile */
+  ::-webkit-scrollbar { width: 3px; height: 3px; }
 }
 
 /* ========== SCROLLBAR ========== */

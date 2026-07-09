@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>种菜收益终极计算器 V4.0</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
+        h2, h3 { color: #2c3e50; margin-top: 0; }
+        .container { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .panel { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .left-panel { flex: 1; min-width: 320px; }
+        .right-panel { flex: 2; min-width: 500px; overflow-x: auto; }
+        .full-panel { width: 100%; box-sizing: border-box; overflow-x: auto; margin-bottom: 20px;}
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        select, input[type="number"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .note { font-size: 12px; color: #7f8c8d; margin-top: 4px; line-height: 1.4; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; white-space: nowrap; }
+        th, td { border: 1px solid #e0e0e0; padding: 10px 8px; text-align: center; }
+        th { background-color: #27ae60; color: white; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .highlight { color: #e74c3c; font-weight: bold; }
+        .best-cell { color: #27ae60; font-weight: bold; background-color: #eaeded; border: 2px solid #27ae60;}
+        
+        .diff-up { color: #2ecc71; font-weight: bold; }
+        .diff-down { color: #e74c3c; font-weight: bold; }
+        
+        /* 独立肥料模块样式 */
+        .fert-panel { border-left: 6px solid #f39c12; }
+        .fert-controls { display: flex; gap: 15px; background: #fef9e7; padding: 12px; border-radius: 6px; margin-bottom: 12px; align-items: center; flex-wrap: wrap;}
+        .fert-controls label { margin-bottom: 0; color: #d35400; font-size: 14px; }
+        .fert-controls input { width: 80px; }
+
+        /* 对比与神偷专用样式 */
+        .combo-controls { display: flex; gap: 15px; background: #fdfefe; padding: 15px; border-radius: 8px; border: 1px dashed #bdc3c7; margin-bottom: 15px; flex-wrap: wrap; align-items: center;}
+        .combo-controls .control-item { display: flex; align-items: center; gap: 8px; }
+        .combo-controls label { margin-bottom: 0; color: #2980b9; }
+        .combo-controls input, .combo-controls select { width: 70px; padding: 4px 8px; }
+
+        .thief-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 15px;}
+        .thief-plot { border: 2px solid #8e44ad; border-radius: 8px; padding: 10px; background-color: #f5eef8; display:flex; flex-direction:column; gap:8px;}
+        .thief-result { background: #2c3e50; color: white; padding: 15px; border-radius: 8px; text-align: center; font-size: 18px;}
+        .profit-yes { color: #2ecc71; font-weight: bold; font-size: 24px;}
+        .profit-no { color: #e74c3c; font-weight: bold; font-size: 24px;}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 动态计算器部分 -->
+        <div class="panel left-panel">
+            <h2>我的农场状态设置</h2>
+            
+            <div class="form-group">
+                <label>第一类道具</label>
+                <select id="item1">
+                    <option value="none">无</option>
+                    <option value="clock">速生钟 (减时间)</option>
+                    <option value="symbiotic">共生苗 (加产量, 需甘蔗)</option>
+                    <option value="dice">丰收骰子 (概率加成)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>第一类道具等级 (1-10)</label>
+                <input type="number" id="item1Level" min="1" max="10" value="10">
+            </div>
+
+            <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+
+            <div class="form-group">
+                <label>第二类道具</label>
+                <select id="item2">
+                    <option value="none">无</option>
+                    <option value="gourd">醇化葫 (加时间, 加产量)</option>
+                    <option value="hourglass" selected>净化沙漏 (按除异常加成)</option>
+                    <option value="bag">乾坤袋 (偷菜加成 - 暂不影响收益)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>第二类道具等级 (1-10)</label>
+                <input type="number" id="item2Level" min="1" max="10" value="10">
+            </div>
+            <div class="form-group" id="clearCountGroup">
+                <label>净化沙漏: 预计除异常次数</label>
+                <select id="clearCount">
+                    <option value="1">1次</option>
+                    <option value="2" selected>2次</option>
+                    <option value="3">3次</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label style="color:#d35400;">测试共生苗: 当前作物吃到加成了吗？</label>
+                <select id="symbioticTrigger">
+                    <option value="yes">是 (与甘蔗相邻)</option>
+                    <option value="no">否</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="panel right-panel">
+            <h2>当前配置收益结果 (无肥料基础状态)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>作物</th>
+                        <th>实际耗时 (h)</th>
+                        <th>预期产量</th>
+                        <th>单次利润 (¥)</th>
+                        <th>每小时利润 (¥/h)</th>
+                    </tr>
+                </thead>
+                <tbody id="resultTable">
+                    <!-- JS动态填充 -->
+                </tbody>
+            </table>
+            <p class="note" style="margin-top:20px;">* 注：时间最低限制为0.25小时(15分钟)。丰收骰子按40%触发概率计算数学期望收益。每小时收益最高项已标绿。</p>
+        </div>
+    </div>
+
+    <!-- 独立肥料模拟计算模块 -->
+    <div class="panel full-panel fert-panel">
+        <h2>🔥 独立肥料效益计算器 (25金币/个 = 减1小时，保底15分钟)</h2>
+        <div class="fert-controls">
+            <label>在此输入打算对目标作物使用的肥料数量：</label>
+            <input type="number" id="fertSimCount" min="0" value="1">
+            <span class="note" style="margin-top:0;">* 将基于您在上方“我的农场状态设置”中的道具等级同步计算。</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>作物</th>
+                    <th>不施肥耗时</th>
+                    <th>不施肥每小时利润</th>
+                    <th style="background:#fdf2e9;">施肥后耗时</th>
+                    <th style="background:#fdf2e9;">施肥后每小时利润</th>
+                    <th style="background:#fdf2e9;">施肥效益结论</th>
+                </tr>
+            </thead>
+            <tbody id="fertTable">
+                <!-- JS动态填充 -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 神偷手分析面板 -->
+    <div class="panel full-panel" style="border-left: 6px solid #8e44ad;">
+        <h2>🎭 神偷手 (600金币) 目标农场探测器</h2>
+        <p class="note" style="margin-top:-10px; margin-bottom: 15px;">* 偷取规则：获利 = 目标作物实际总产量价值 × 30%。请根据对方农场的实际情况填入作物和产量：</p>
+        
+        <div class="thief-grid" id="thiefGrid">
+            <!-- JS生成6块地 -->
+        </div>
+
+        <div class="thief-result">
+            总计可偷取收益：<span id="stealTotal" style="color:#f1c40f; font-weight:bold;">¥0</span> &nbsp;|&nbsp; 
+            扣除600成本后净赚：<span id="stealNet" class="profit-no">¥0</span>
+            <div style="font-size: 14px; margin-top: 10px; color:#bdc3c7;" id="stealAdvice">分析中...</div>
+        </div>
+    </div>
+
+    <!-- 静态组合对比表格部分 -->
+    <div class="panel full-panel">
+        <h2>全流派组合收益总览 (自定义等级对比)</h2>
+        <div class="combo-controls" id="comboControls">
+            <span style="font-weight:bold; color:#34495e; margin-right:10px;">设置实际等级：</span>
+            <div class="control-item"><label>钟Lv:</label><input type="number" id="compClockLv" min="1" max="10" value="10"></div>
+            <div class="control-item"><label>苗Lv:</label><input type="number" id="compSymbLv" min="1" max="10" value="10"></div>
+            <div class="control-item"><label>骰Lv:</label><input type="number" id="compDiceLv" min="1" max="10" value="10"></div>
+            <div class="control-item"><label>葫Lv:</label><input type="number" id="compGourdLv" min="1" max="10" value="10"></div>
+            <div class="control-item"><label>漏Lv:</label><input type="number" id="compGlassLv" min="1" max="10" value="10"></div>
+            <div class="control-item"><label>除虫:</label><select id="compClearCnt"><option value="1">1次</option><option value="2" selected>2次</option><option value="3">3次</option></select></div>
+        </div>
+        <table>
+            <thead id="comboThead"></thead>
+            <tbody id="comboTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const crops = [
+            { id: 'wheat', name: '小麦', cost: 0, time: 6, yield: 15, price: 5 },
+            { id: 'cabbage', name: '白菜', cost: 20, time: 8, yield: 25, price: 8 },
+            { id: 'radish', name: '萝卜', cost: 35, time: 10, yield: 15, price: 17 },
+            { id: 'chili', name: '辣椒', cost: 55, time: 12, yield: 45, price: 8 },
+            { id: 'cane', name: '甘蔗', cost: 120, time: 22, yield: 28, price: 20 }
+        ];
+
+        const hourglassRates = [0, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16]; 
+
+        // 核心种植计算逻辑
+        function calcCropStats(crop, item1, lv1, item2, lv2, clearCount, symbioticTrigger, fertCount = 0) {
+            let finalYield = crop.yield;
+            let timeReduce = 0; 
+
+            if (item1 === 'clock') timeReduce += (15 + 15 * lv1) / 60;
+            if (item1 === 'symbiotic' && symbioticTrigger) finalYield += lv1;
+            if (item1 === 'dice') finalYield += 0.4 * (0.05 * lv1) * crop.yield;
+
+            if (item2 === 'gourd') finalYield += (lv2 + 1);
+            if (item2 === 'hourglass') {
+                let rate = hourglassRates[lv2] / 100;
+                finalYield += (crop.yield * rate * clearCount);
+            }
+
+            let baseGrowTime = crop.time - timeReduce - fertCount;
+            if (baseGrowTime < 0.25) baseGrowTime = 0.25;
+
+            let finalTime = baseGrowTime;
+            if (item2 === 'gourd') finalTime += 2; 
+
+            let totalCost = crop.cost + (fertCount * 25);
+            let profit = (finalYield * crop.price) - totalCost;
+            let pph = profit / finalTime; 
+
+            return { time: finalTime, yield: finalYield, cost: totalCost, profit: profit, pph: pph };
+        }
+
+        // 更新左上角主计算器与独立肥料模块
+        function updateCalculator() {
+            const item1 = document.getElementById('item1').value;
+            const lv1 = parseInt(document.getElementById('item1Level').value) || 1;
+            const item2 = document.getElementById('item2').value;
+            const lv2 = parseInt(document.getElementById('item2Level').value) || 1;
+            const clearCount = parseInt(document.getElementById('clearCount').value);
+            const symbioticTrigger = document.getElementById('symbioticTrigger').value === 'yes';
+            const fertSim = parseInt(document.getElementById('fertSimCount').value) || 0;
+
+            document.getElementById('clearCountGroup').style.display = (item2 === 'hourglass') ? 'block' : 'none';
+
+            // 1. 刷新主计算器表格
+            let results = crops.map(crop => {
+                let stats = calcCropStats(crop, item1, lv1, item2, lv2, clearCount, symbioticTrigger, 0);
+                return { name: crop.name, ...stats };
+            });
+
+            let maxPph = Math.max(...results.map(r => r.pph));
+            const tbody = document.getElementById('resultTable');
+            tbody.innerHTML = '';
+            
+            results.forEach(r => {
+                let isBest = Math.abs(r.pph - maxPph) < 0.01;
+                let tr = document.createElement('tr');
+                if (isBest) tr.className = 'best';
+                
+                tr.innerHTML = `
+                    <td>${r.name}</td>
+                    <td>${r.time.toFixed(2)}</td>
+                    <td>${r.yield.toFixed(1)}</td>
+                    <td>¥${r.profit.toFixed(2)}</td>
+                    <td class="highlight">¥${r.pph.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // 2. 刷新独立肥料模拟表格
+            const fertTbody = document.getElementById('fertTable');
+            fertTbody.innerHTML = '';
+
+            crops.forEach(crop => {
+                let baseStat = calcCropStats(crop, item1, lv1, item2, lv2, clearCount, symbioticTrigger, 0);
+                let fertStat = calcCropStats(crop, item1, lv1, item2, lv2, clearCount, symbioticTrigger, fertSim);
+                let diff = fertStat.pph - baseStat.pph;
+                let diffText = "";
+                
+                if (fertSim === 0) {
+                    diffText = `<span style="color:#7f8c8d;">未设置肥料数</span>`;
+                } else if (diff > 0) {
+                    diffText = `<span class="diff-up">✅ 赚了！提升 ¥${diff.toFixed(2)}/h</span>`;
+                } else {
+                    diffText = `<span class="diff-down">❌ 亏了！倒扣 ¥${Math.abs(diff).toFixed(2)}/h</span>`;
+                }
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>${crop.name}</b></td>
+                    <td>${baseStat.time.toFixed(2)}h</td>
+                    <td>¥${baseStat.pph.toFixed(2)}/h</td>
+                    <td style="background-color:#fdf2e9;">${fertStat.time.toFixed(2)}h</td>
+                    <td style="background-color:#fdf2e9; font-weight:bold;">¥${fertStat.pph.toFixed(2)}/h</td>
+                    <td style="background-color:#fdf2e9;">${diffText}</td>
+                `;
+                fertTbody.appendChild(tr);
+            });
+        }
+
+        // 神偷手逻辑
+        function initThiefGrid() {
+            const grid = document.getElementById('thiefGrid');
+            let html = '';
+            for(let i=1; i<=6; i++) {
+                html += `
+                <div class="thief-plot">
+                    <span style="font-weight:bold; color:#8e44ad; font-size:14px;">地块 ${i}</span>
+                    <label style="font-size:12px; margin-bottom:0;">作物类型:</label>
+                    <select id="tCrop${i}" onchange="onThiefCropChange(${i})">
+                        <option value="none">空地/保护</option>
+                        <option value="wheat">小麦 (单价:5)</option>
+                        <option value="cabbage">白菜 (单价:8)</option>
+                        <option value="radish">萝卜 (单价:17)</option>
+                        <option value="chili" ${i<=2?'selected':''}>辣椒 (单价:8)</option>
+                        <option value="cane" ${i===3?'selected':''}>甘蔗 (单价:20)</option>
+                    </select>
+                    <label style="font-size:12px; margin-bottom:0; margin-top:5px;">实际产量(个):</label>
+                    <input type="number" id="tYield${i}" min="0" oninput="updateThief()" value="${i<=2?45:(i===3?28:0)}">
+                </div>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        function onThiefCropChange(index) {
+            const cropId = document.getElementById(`tCrop${index}`).value;
+            const yieldInput = document.getElementById(`tYield${index}`);
+            
+            if(cropId === 'none') {
+                yieldInput.value = 0;
+            } else {
+                const crop = crops.find(c => c.id === cropId);
+                yieldInput.value = crop.yield; 
+            }
+            updateThief();
+        }
+
+        function updateThief() {
+            let totalValue = 0;
+            for(let i=1; i<=6; i++) {
+                let cropId = document.getElementById(`tCrop${i}`).value;
+                let qty = parseInt(document.getElementById(`tYield${i}`).value) || 0;
+                
+                if(cropId !== 'none' && qty > 0) {
+                    const crop = crops.find(c => c.id === cropId);
+                    totalValue += (crop.price * qty);
+                }
+            }
+            
+            let stealValue = totalValue * 0.3;
+            let netProfit = stealValue - 600;
+            
+            document.getElementById('stealTotal').innerText = `¥${stealValue.toFixed(2)}`;
+            let netEl = document.getElementById('stealNet');
+            let adviceEl = document.getElementById('stealAdvice');
+            
+            if (netProfit > 0) {
+                netEl.innerText = `+¥${netProfit.toFixed(2)}`;
+                netEl.className = 'profit-yes';
+                adviceEl.innerText = "💡 建议：对方非常肥！门票回本且净赚，直接下手！";
+                adviceEl.style.color = "#2ecc71";
+            } else {
+                netEl.innerText = `¥${netProfit.toFixed(2)}`;
+                netEl.className = 'profit-no';
+                adviceEl.innerText = "🚨 警告：目标太穷，偷来的菜连600块门票都换不回来，千万别偷！";
+                adviceEl.style.color = "#e74c3c";
+            }
+        }
+
+        // 底部对比表格逻辑
+        function generateComboTable() {
+            const cClock = parseInt(document.getElementById('compClockLv').value) || 1;
+            const cSymb = parseInt(document.getElementById('compSymbLv').value) || 1;
+            const cDice = parseInt(document.getElementById('compDiceLv').value) || 1;
+            const cGourd = parseInt(document.getElementById('compGourdLv').value) || 1;
+            const cGlass = parseInt(document.getElementById('compGlassLv').value) || 1;
+            const cClear = parseInt(document.getElementById('compClearCnt').value) || 1;
+
+            const combos = [
+                { i1: 'clock', lv1: cClock, i2: 'gourd', lv2: cGourd, name: '极限压缩流', short: `钟Lv${cClock}+葫Lv${cGourd}` },
+                { i1: 'symbiotic', lv1: cSymb, i2: 'gourd', lv2: cGourd, name: '甘蔗高产流', short: `苗Lv${cSymb}+葫Lv${cGourd}` },
+                { i1: 'dice', lv1: cDice, i2: 'gourd', lv2: cGourd, name: '佛系玄学流', short: `骰Lv${cDice}+葫Lv${cGourd}` },
+                { i1: 'clock', lv1: cClock, i2: 'hourglass', lv2: cGlass, name: '高频爆产流', short: `钟Lv${cClock}+漏Lv${cGlass}` },
+                { i1: 'symbiotic', lv1: cSymb, i2: 'hourglass', lv2: cGlass, name: '甘蔗核心流', short: `苗Lv${cSymb}+漏Lv${cGlass}` },
+                { i1: 'dice', lv1: cDice, i2: 'hourglass', lv2: cGlass, name: '赌狗极限流', short: `骰Lv${cDice}+漏Lv${cGlass}` }
+            ];
+
+            const thead = document.getElementById('comboThead');
+            let headHtml = '<tr><th style="background-color:#34495e;">作物</th>';
+            combos.forEach((c, index) => {
+                headHtml += `<th>① ${c.name}<br><span style="font-size:12px; font-weight:normal; color:#f1c40f;">(${c.short})</span></th>`.replace('①', ['①','②','③','④','⑤','⑥'][index]);
+            });
+            headHtml += '</tr>';
+            thead.innerHTML = headHtml;
+
+            const tbody = document.getElementById('comboTable');
+            tbody.innerHTML = '';
+
+            crops.forEach(crop => {
+                let tr = document.createElement('tr');
+                let html = `<td><b>${crop.name}</b></td>`;
+                
+                let rowPphs = combos.map(combo => calcCropStats(crop, combo.i1, combo.lv1, combo.i2, combo.lv2, cClear, true, 0).pph);
+                let maxRowPph = Math.max(...rowPphs);
+
+                rowPphs.forEach(pph => {
+                    let isBest = Math.abs(pph - maxRowPph) < 0.01;
+                    html += `<td class="${isBest ? 'best-cell' : ''}">¥${pph.toFixed(2)}/h</td>`;
+                });
+
+                tr.innerHTML = html;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 事件绑定
+        document.querySelectorAll('.panel.left-panel select, .panel.left-panel input, #fertSimCount').forEach(el => {
+            el.addEventListener('input', updateCalculator);
+            el.addEventListener('change', updateCalculator);
+        });
+
+        document.querySelectorAll('#comboControls input, #comboControls select').forEach(el => {
+            el.addEventListener('input', generateComboTable);
+            el.addEventListener('change', generateComboTable);
+        });
+
+        // 初始化
+        initThiefGrid();
+        updateCalculator();
+        updateThief();
+        generateComboTable();
+    </script>
+</body>
+</html>

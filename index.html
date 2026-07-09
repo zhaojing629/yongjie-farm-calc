@@ -432,7 +432,7 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
       </table></div>
       <div class="note" style="margin-top:14px;">
         * 时间最低限制为0.25小时(15分钟)。结果已按总利润/h降序排列。<br>
-        <sup style="color:var(--accent);">*</sup> 暴击产量 = round( (基础 + 沙漏 + 葫 + 共生苗) × 2 + 除虫 ) × (1 + 骰子%) 。目前仅验证了沙漏的计算方式，共生苗和葫的参与方式待实测确认。
+        <sup style="color:var(--accent);">*</sup> 暴击产量 = round( (基础 + 沙漏 + 葫 + 共生苗) × 2 + 除虫 ) × (1 + 骰子%) 。目前仅验证了沙漏和除虫（沙漏参与翻倍，除虫在翻倍后加），共生苗、葫和骰子是否也按此公式计算待实测确认。
       </div>
     </div>
   </div>
@@ -492,20 +492,28 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
       ⚠️ 醇化葫的 +2h 是成熟后额外成长，<strong>肥料对葫的2h无效</strong>，因此带葫时生长时间最低 2.25h。
     </div>
 
-    <!-- Row 0: Water & Pest -->
-    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px;">
-      <div class="form-group" style="margin-bottom:0;min-width:120px;">
-        <label>💧 浇水次数</label>
-        <select id="fertWaterCount" onchange="calcFertilizer()">
+    <!-- Row 0: Crop + Water + Pest (inline, label-left) -->
+    <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:13px;font-weight:550;color:var(--text2);white-space:nowrap;">🌱 作物</span>
+        <select id="fertCrop" onchange="calcFertilizer()" style="width:auto;min-width:110px;">
+          <option value="wheat">🌾 小麦</option><option value="cabbage">🥬 白菜</option>
+          <option value="radish">🥕 萝卜</option><option value="pepper" selected>🌶️ 辣椒</option>
+          <option value="cane">🎋 甘蔗</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:13px;font-weight:550;color:var(--text2);white-space:nowrap;">💧 浇水</span>
+        <select id="fertWaterCount" onchange="calcFertilizer()" style="width:auto;min-width:100px;">
           <option value="0">0 次</option>
           <option value="1" selected>1 次（−1h）</option>
           <option value="2">2 次（−2h）</option>
           <option value="3">3 次（−3h）</option>
         </select>
       </div>
-      <div class="form-group" style="margin-bottom:0;min-width:120px;">
-        <label>🪲 除虫次数</label>
-        <select id="fertPestCount" onchange="calcFertilizer()">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:13px;font-weight:550;color:var(--text2);white-space:nowrap;">🪲 除虫</span>
+        <select id="fertPestCount" onchange="calcFertilizer()" style="width:auto;min-width:100px;">
           <option value="0">0 次</option>
           <option value="1" selected>1 次（+1产量）</option>
           <option value="2">2 次（+2产量）</option>
@@ -514,20 +522,8 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
       </div>
     </div>
 
-    <!-- Row 1: Crop only -->
-    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px;">
-      <div class="form-group" style="margin-bottom:0;min-width:150px;">
-        <label>🌱 选择作物</label>
-        <select id="fertCrop" onchange="calcFertilizer()">
-          <option value="wheat">🌾 小麦</option><option value="cabbage">🥬 白菜</option>
-          <option value="radish">🥕 萝卜</option><option value="pepper" selected>🌶️ 辣椒</option>
-          <option value="cane">🎋 甘蔗</option>
-        </select>
-      </div>
-    </div>
-
     <!-- Row 2: Item1 + inline sub-options -->
-    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px;">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:22px;">
       <div class="form-group" style="margin-bottom:0;min-width:150px;">
         <label>🔧 第一类道具</label>
         <select id="fertItem1" onchange="calcFertilizer();updateFertUI();">
@@ -537,14 +533,14 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
           <option value="harvestDice">🎲 丰收骰子</option>
         </select>
       </div>
-      <div class="form-group" style="margin-bottom:0;min-width:85px;" id="fertItem1LevelG">
+      <div class="form-group" style="margin-bottom:0;min-width:85px;position:relative;" id="fertItem1LevelG">
         <label>等级</label>
         <select id="fertItem1Level" onchange="calcFertilizer()">
           <option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option>
           <option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option>
           <option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option>
         </select>
-        <div class="note" id="fert-note-item1-lv"></div>
+        <div class="note" id="fert-note-item1-lv" style="position:absolute;top:100%;left:0;right:0;font-size:11px;line-height:1.1;white-space:nowrap;"></div>
       </div>
       <!-- Item1 sub: symbiotic -->
       <div class="form-group" style="margin-bottom:0;min-width:120px;" id="fertSymbGroup" hidden>
@@ -564,7 +560,7 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
     </div>
 
     <!-- Row 3: Item2 + inline sub-options -->
-    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:24px;">
       <div class="form-group" style="margin-bottom:0;min-width:150px;">
         <label>🔧 第二类道具</label>
         <select id="fertItem2" onchange="calcFertilizer();updateFertUI();">
@@ -574,14 +570,14 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
           <option value="bag">🎒 乾坤袋（同无）</option>
         </select>
       </div>
-      <div class="form-group" style="margin-bottom:0;min-width:85px;" id="fertItem2LevelG">
+      <div class="form-group" style="margin-bottom:0;min-width:85px;position:relative;" id="fertItem2LevelG">
         <label>等级</label>
         <select id="fertItem2Level" onchange="calcFertilizer()">
           <option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option>
           <option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option>
           <option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option>
         </select>
-        <div class="note" id="fert-note-item2-lv"></div>
+        <div class="note" id="fert-note-item2-lv" style="position:absolute;top:100%;left:0;right:0;font-size:11px;line-height:1.1;white-space:nowrap;"></div>
       </div>
       <!-- Item2 sub: sandglass -->
       <div class="form-group" style="margin-bottom:0;min-width:130px;" id="fertSandGroup" hidden>

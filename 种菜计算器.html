@@ -427,11 +427,12 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
       <div class="panel">
         <h2>📈 当前配置收益结果</h2>
       <div class="table-wrap"><table>
-        <thead><tr><th>作物</th><th>实际耗时 (h)</th><th>预期产量</th><th>单次利润 (¥)</th><th>每小时利润 (¥/h)</th><th>6块地总利润/h</th></tr></thead>
+        <thead><tr><th>作物</th><th>实际耗时 (h)</th><th>预期产量</th><th>暴击产量 <sup style="color:var(--accent);">*</sup></th><th>单次利润 (¥)</th><th>每小时利润 (¥/h)</th><th>6块地总利润/h</th></tr></thead>
         <tbody id="resultTable"></tbody>
       </table></div>
       <div class="note" style="margin-top:14px;">
-        * 时间最低限制为0.25小时(15分钟)。结果已按总利润/h降序排列。
+        * 时间最低限制为0.25小时(15分钟)。结果已按总利润/h降序排列。<br>
+        <sup style="color:var(--accent);">*</sup> 暴击产量 = round( (基础 + 沙漏 + 葫 + 共生苗) × 2 + 除虫 ) × (1 + 骰子%) 。目前仅验证了沙漏的计算方式，共生苗和葫的参与方式待实测确认。
       </div>
     </div>
   </div>
@@ -663,12 +664,23 @@ function calcCropStats(crop, item1, lv1, item2, lv2, sandN, symAdjCount, diceMod
     y = Math.round(y * (1 + diceP * 0.05 * lv1));
   }
 
+  // Crit (double) yield: (base + sandglass + gourd + symbiotic) ×2 + pest, then dice
+  var yCrit = crop.yield;
+  if (item1 === 'symbiotic' && symAdjCount > 0) yCrit += lv1 * symAdjCount;
+  if (item2 === 'gourd') yCrit += (lv2 + 1);
+  if (item2 === 'sandglass') yCrit += Math.round(crop.yield * (sandglassPcts[lv2] / 100)) * sandN;
+  yCrit = yCrit * 2;  // double: (base + all growth bonuses) × 2
+  yCrit += (pestCount || 0) * 1;  // pest added after double
+  if (item1 === 'harvestDice') {
+    yCrit = Math.round(yCrit * (1 + diceP * 0.05 * lv1));
+  }
+
   if (t < 0.25) t = 0.25;
 
   var profit = (y * crop.price) - crop.cost;
   var pph = profit / t;
 
-  return { time:t, yield:y, profit:profit, pph:pph };
+  return { time:t, yield:y, critYield:yCrit, profit:profit, pph:pph };
 }
 
 // ===================== HELPERS =====================
@@ -809,6 +821,7 @@ function updateCalculator() {
         '<td' + testStyle + '>' + r.name + noteHtml + '</td>' +
         '<td>' + r.stats.time.toFixed(2) + ' h</td>' +
         '<td>' + r.stats.yield.toFixed(1) + '</td>' +
+        '<td>' + r.stats.critYield.toFixed(1) + '</td>' +
         '<td>¥' + r.stats.profit.toFixed(2) + '</td>' +
         '<td class="highlight">¥' + r.stats.pph.toFixed(2) + '/h</td>' +
         '<td class="highlight">¥' + (r.stats.pph * 6).toFixed(2) + '/h</td>';
@@ -817,6 +830,7 @@ function updateCalculator() {
         '<td><b>' + r.name + '</b> <span class="combo-tag">3+3</span></td>' +
         '<td style="font-size:12px;">周期 ' + r.period.toFixed(1) + 'h<br><small style="color:var(--text2);">🎋' + r.cane.time.toFixed(1) + 'h×' + r.caneN + '轮 + ' + r.otherEmoji + r.other.time.toFixed(1) + 'h×' + r.otherN + '轮</small></td>' +
         '<td style="font-size:12px;"><small>🎋' + r.cane.yield.toFixed(1) + '×' + r.caneN + '=' + (r.cane.yield * r.caneN).toFixed(0) + '<br>' + r.otherEmoji + r.other.yield.toFixed(1) + '×' + r.otherN + '=' + (r.other.yield * r.otherN).toFixed(0) + '</small></td>' +
+        '<td style="font-size:12px;"><small>🎋' + r.cane.critYield.toFixed(1) + '×' + r.caneN + '=' + (r.cane.critYield * r.caneN).toFixed(0) + '<br>' + r.otherEmoji + r.other.critYield.toFixed(1) + '×' + r.otherN + '=' + (r.other.critYield * r.otherN).toFixed(0) + '</small></td>' +
         '<td style="font-size:12px;">¥' + r.totalProfit.toFixed(0) + '<br><small style="color:var(--text2);">周期总利润</small></td>' +
         '<td class="highlight">¥' + r.perPlotPph.toFixed(2) + '/h<br><small style="color:var(--text2);">等效单株</small></td>' +
         '<td class="highlight">¥' + r.totalPph.toFixed(2) + '/h</td>';

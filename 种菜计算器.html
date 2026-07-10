@@ -416,6 +416,7 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
         <div class="form-group" style="margin-bottom:0;min-width:120px;">
           <label>🪲 除虫次数</label>
           <select id="pestCount" onchange="updateCalculator()">
+            <option value="-1">长虫了（−1产量）</option>
             <option value="0">0 次</option>
             <option value="1" selected>1 次（+1产量）</option>
             <option value="2">2 次（+2产量）</option>
@@ -449,7 +450,7 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
       <div class="control-item"><label>沙漏触发次数</label><select id="compClearCnt"><option value="1">1次</option><option value="2" selected>2次</option><option value="3">3次</option></select></div>
       <div class="control-item"><label>骰子事件次数</label><select id="compDiceMode"><option value="2">2次≈64%</option><option value="c" selected>必定触发</option></select></div>
       <div class="control-item"><label>💧 浇水次数</label><select id="compWaterCount"><option value="0">0次</option><option value="1" selected>1次</option><option value="2">2次</option><option value="3">3次</option></select></div>
-      <div class="control-item"><label>🪲 除虫次数</label><select id="compPestCount"><option value="0">0次</option><option value="1" selected>1次</option><option value="2">2次</option><option value="3">3次</option></select></div>
+      <div class="control-item"><label>🪲 除虫次数</label><select id="compPestCount"><option value="-1">长虫了（−1）</option><option value="0">0次</option><option value="1" selected>1次</option><option value="2">2次</option><option value="3">3次</option></select></div>
     </div>
     <div class="note" style="margin-top:8px;">以上大前提同时作用于下方两个模块的计算结果。</div>
   </div>
@@ -514,6 +515,7 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
       <div style="display:flex;align-items:center;gap:6px;">
         <span style="font-size:13px;font-weight:550;color:var(--text2);white-space:nowrap;">🪲 除虫</span>
         <select id="fertPestCount" onchange="calcFertilizer()" style="width:auto;min-width:100px;">
+          <option value="-1">长虫了（−1产量）</option>
           <option value="0">0 次</option>
           <option value="1" selected>1 次（+1产量）</option>
           <option value="2">2 次（+2产量）</option>

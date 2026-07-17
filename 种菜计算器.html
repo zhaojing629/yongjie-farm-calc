@@ -328,81 +328,85 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
 
   <!-- Calculator -->
   <div class="flex-row">
-    <div class="panel flex-1">
-      <h2>⚙️ 当前状态计算器</h2>
-      <div class="form-group">
-        <label>第一类道具</label>
-        <select id="item1">
-          <option value="none">无</option>
-          <option value="speedBell" selected>🔔 速生钟 — 缩短生长时间</option>
-          <option value="symbiotic">🌿 共生苗 — 与甘蔗相邻的作物增加产量</option>
-          <option value="harvestDice">🎲 丰收骰子 — 必定触发产量加成（仅生效1次）</option>
-        </select>
-        <div class="note" id="note-item1"></div>
+    <div class="flex-1" style="display:flex;flex-direction:column;gap:16px;">
+      <!-- Card 1: 第一类道具 -->
+      <div class="panel" style="margin:0;">
+        <h2>🔔 第一类道具</h2>
+        <div class="form-group">
+          <label>道具选择</label>
+          <select id="item1">
+            <option value="none">无</option>
+            <option value="speedBell" selected>🔔 速生钟 — 缩短生长时间</option>
+            <option value="symbiotic">🌿 共生苗 — 与甘蔗相邻的作物增加产量</option>
+            <option value="harvestDice">🎲 丰收骰子 — 必定触发产量加成（仅生效1次）</option>
+          </select>
+          <div class="note" id="note-item1"></div>
+        </div>
+        <div class="form-group">
+          <label>道具等级</label>
+          <select id="item1Level">
+            <option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option>
+            <option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option><option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option>
+          </select>
+          <div class="note" id="note-item1-lv"></div>
+        </div>
+        <div class="form-group" id="diceModeGroup" style="display:none;">
+          <label>🎲 丰收骰子触发事件次数</label>
+          <select id="diceMode">
+            <option value="2">2次事件（仅种植+收获，≈64%触发）</option>
+            <option value="c" selected>必定触发（100%，默认）</option>
+          </select>
+          <div class="note">作物生长时间越短、好友越少 → 触发率偏低（接近64%）。作物生长时间越长、好友越多 → 可按100%必定触发来算。</div>
+        </div>
+        <div class="form-group" id="symbioticGroup" style="display:none;">
+          <label>🌿 共生苗布局（a棵甘蔗 + 6−a棵其他）</label>
+          <select id="symbioticLayout" onchange="updateCalculator()">
+            <option value="1">1🎋+5🌱 (中排C/D, 3/6加成)</option>
+            <option value="2" selected>2🎋+4🌱 (中排C+D, 6/6全覆盖) ⭐推荐</option>
+            <option value="3">3🎋+3🌱 (串连, 6/6全覆盖)</option>
+            <option value="4">4🎋+2🌱 (6/6全覆盖)</option>
+            <option value="5">5🎋+1🌱 (6/6全覆盖)</option>
+            <option value="6">全🎋×6</option>
+          </select>
+          <div class="layout-diagram" id="symbioticDiagram" style="margin-top:8px;"></div>
+        </div>
       </div>
-      <div class="form-group">
-        <label>第一类道具等级</label>
-        <select id="item1Level">
-          <option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option>
-          <option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option><option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option>
-        </select>
-        <div class="note" id="note-item1-lv"></div>
-      </div>
-      <div class="form-group" id="diceModeGroup" style="display:none;">
-        <label>🎲 丰收骰子触发事件次数</label>
-        <select id="diceMode">
-          <option value="2">2次事件（仅种植+收获，≈64%触发）</option>
-          <option value="c" selected>必定触发（100%，默认）</option>
-        </select>
-        <div class="note">作物生长时间越短、好友越少 → 触发率偏低（接近64%）。作物生长时间越长、好友越多 → 可按100%必定触发来算。</div>
-      </div>
-      <hr>
-      <div class="form-group">
-        <label>第二类道具</label>
-        <select id="item2">
-          <option value="none">无</option>
-          <option value="gourd">🍶 醇化葫 — 成熟后额外成长2小时，获得额外产量</option>
-          <option value="sandglass" selected>⏳ 净化沙漏 — 清除异常状态获得额外产量</option>
-          <option value="brush">🖌️ 如意笔 — 改变作物基础属性</option>
-          <option value="bag">🎒 乾坤袋 — 偷菜额外收益（不影响种菜）</option>
-        </select>
-        <div class="note" id="note-item2"></div>
-      </div>
-      <div class="form-group">
-        <label>第二类道具等级</label>
-        <select id="item2Level">
-          <option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option>
-          <option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option>
-          <option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option>
-        </select>
-        <div class="note" id="note-item2-lv"></div>
-      </div>
-      <div class="form-group" id="sandglassGroup">
-        <label>净化沙漏：预计清除异常次数</label>
-        <select id="sandglassN">
-          <option value="0">0 次</option><option value="1">1 次</option><option value="2" selected>2 次</option><option value="3">3 次</option><option value="4">4 次</option>
-        </select>
-        <div class="note">种植时间越长，触发频率可能越高（如甘蔗比小麦更容易触发），但即使是甘蔗也有可能1次都不触发，可自行估测次数</div>
-      </div>
-      <div class="form-group" id="brushGroup" style="display:none;">
-        <label>🖌️ 如意笔等级</label>
-        <select id="brushLevel">
-          <option value="1" selected>Lv1</option><option value="2">Lv2</option>
-        </select>
-        <div class="note" id="note-brush"></div>
-      </div>
-      <hr>
-      <div class="form-group" id="symbioticGroup" style="display:none;">
-        <label>🌿 共生苗布局（a棵甘蔗 + 6−a棵其他）</label>
-        <select id="symbioticLayout" onchange="updateCalculator()">
-          <option value="1">1🎋+5🌱 (中排C/D, 3/6加成)</option>
-          <option value="2" selected>2🎋+4🌱 (中排C+D, 6/6全覆盖) ⭐推荐</option>
-          <option value="3">3🎋+3🌱 (串连, 6/6全覆盖)</option>
-          <option value="4">4🎋+2🌱 (6/6全覆盖)</option>
-          <option value="5">5🎋+1🌱 (6/6全覆盖)</option>
-          <option value="6">全🎋×6</option>
-        </select>
-        <div class="layout-diagram" id="symbioticDiagram" style="margin-top:8px;"></div>
+      <!-- Card 2: 第二类道具 -->
+      <div class="panel" style="margin:0;">
+        <h2>🍶 第二类道具</h2>
+        <div class="form-group">
+          <label>道具选择</label>
+          <select id="item2">
+            <option value="none">无</option>
+            <option value="gourd">🍶 醇化葫 — 成熟后额外成长2小时，获得额外产量</option>
+            <option value="sandglass" selected>⏳ 净化沙漏 — 清除异常状态获得额外产量</option>
+            <option value="brush">🖌️ 如意笔 — 改变作物基础属性</option>
+            <option value="bag">🎒 乾坤袋 — 偷菜额外收益（不影响种菜）</option>
+          </select>
+          <div class="note" id="note-item2"></div>
+        </div>
+        <div class="form-group">
+          <label>道具等级</label>
+          <select id="item2Level">
+            <option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option>
+            <option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option><option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option>
+          </select>
+          <div class="note" id="note-item2-lv"></div>
+        </div>
+        <div class="form-group" id="sandglassGroup">
+          <label>⏳ 净化沙漏：预计清除异常次数</label>
+          <select id="sandglassN">
+            <option value="0">0 次</option><option value="1">1 次</option><option value="2" selected>2 次</option><option value="3">3 次</option><option value="4">4 次</option>
+          </select>
+          <div class="note">种植时间越长，触发频率可能越高（如甘蔗比小麦更容易触发），但即使是甘蔗也有可能1次都不触发，可自行估测次数</div>
+        </div>
+        <div class="form-group" id="brushGroup" style="display:none;">
+          <label>🖌️ 如意笔等级</label>
+          <select id="brushLevel">
+            <option value="1" selected>Lv1</option><option value="2">Lv2</option>
+          </select>
+          <div class="note" id="note-brush"></div>
+        </div>
       </div>
     </div>
 

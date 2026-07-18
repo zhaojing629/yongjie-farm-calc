@@ -328,88 +328,146 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
 
   <!-- Calculator -->
   <div class="flex-row">
-    <div class="panel flex-1">
-      <h2>⚙️ 当前状态计算器</h2>
-      <div class="form-group">
-        <label>第一类道具</label>
-        <select id="item1">
-          <option value="none">无</option>
-          <option value="speedBell" selected>🔔 速生钟 — 缩短生长时间</option>
-          <option value="symbiotic">🌿 共生苗 — 与甘蔗相邻的作物增加产量</option>
-          <option value="harvestDice">🎲 丰收骰子 — 必定触发产量加成（仅生效1次）</option>
-        </select>
-        <div class="note" id="note-item1"></div>
+    <div class="flex-1" style="display:flex;flex-direction:column;gap:16px;">
+      <!-- Card 1: 第一类道具 -->
+      <div class="panel" style="margin:0;">
+        <h2>🔔 第一类道具</h2>
+        <div class="form-group">
+          <label>道具选择</label>
+          <select id="item1">
+            <option value="none">无</option>
+            <option value="speedBell" selected>🔔 速生钟 — 缩短生长时间</option>
+            <option value="symbiotic">🌿 共生苗 — 与甘蔗相邻的作物增加产量</option>
+            <option value="harvestDice">🎲 丰收骰子 — 必定触发产量加成（仅生效1次）</option>
+          </select>
+          <div class="note" id="note-item1"></div>
+        </div>
+        <div class="form-group">
+          <label>道具等级</label>
+          <select id="item1Level">
+            <option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option>
+            <option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option><option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option>
+          </select>
+          <div class="note" id="note-item1-lv"></div>
+        </div>
+        <div class="form-group" id="diceModeGroup" style="display:none;">
+          <label>🎲 丰收骰子触发事件次数</label>
+          <select id="diceMode">
+            <option value="2">2次事件（仅种植+收获，≈64%触发）</option>
+            <option value="c" selected>必定触发（100%，默认）</option>
+          </select>
+          <div class="note">作物生长时间越短、好友越少 → 触发率偏低（接近64%）。作物生长时间越长、好友越多 → 可按100%必定触发来算。</div>
+        </div>
+        <div class="form-group" id="symbioticGroup" style="display:none;">
+          <label>🌿 共生苗布局（a棵甘蔗 + 6−a棵其他）</label>
+          <select id="symbioticLayout" onchange="updateCalculator()">
+            <option value="1">1🎋+5🌱 (中排C/D, 3/6加成)</option>
+            <option value="2" selected>2🎋+4🌱 (中排C+D, 6/6全覆盖) ⭐推荐</option>
+            <option value="3">3🎋+3🌱 (串连, 6/6全覆盖)</option>
+            <option value="4">4🎋+2🌱 (6/6全覆盖)</option>
+            <option value="5">5🎋+1🌱 (6/6全覆盖)</option>
+            <option value="6">全🎋×6</option>
+          </select>
+          <div class="layout-diagram" id="symbioticDiagram" style="margin-top:8px;"></div>
+        </div>
       </div>
-      <div class="form-group">
-        <label>第一类道具等级</label>
-        <select id="item1Level">
-          <option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option>
-          <option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option>
-          <option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option>
-        </select>
-      </div>
-      <hr>
-      <div class="form-group">
-        <label>第二类道具</label>
-        <select id="item2">
-          <option value="none">无</option>
-          <option value="gourd">🍶 醇化葫 — 成熟后额外成长2小时，获得额外产量</option>
-          <option value="sandglass" selected>⏳ 净化沙漏 — 清除异常状态获得额外产量</option>
-          <option value="bag">🎒 乾坤袋 — 偷菜额外收益（不影响种菜）</option>
-        </select>
-        <div class="note" id="note-item2"></div>
-      </div>
-      <div class="form-group">
-        <label>第二类道具等级</label>
-        <select id="item2Level">
-          <option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option>
-          <option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option>
-          <option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option>
-        </select>
-      </div>
-      <div class="form-group" id="sandglassGroup">
-        <label>净化沙漏：预计清除异常次数</label>
-        <select id="sandglassN">
-          <option value="1">1 次</option><option value="2" selected>2 次</option><option value="3">3 次</option>
-        </select>
-        <div class="note">每次清除异常获得基础产量 × 等级对应% 的额外收益</div>
-      </div>
-      <hr>
-      <div class="form-group" id="symbioticGroup" style="display:none;">
-        <label>🌿 共生苗布局 — 3🎋+3其他（固定网格）</label>
-        <div class="layout-diagram">
-          <strong>3+3 网格布局（XO/OX/XO）</strong><br>
-          ┌────┬────┐<br>
-          │ 🎋 │ 🌱 │  ← 🌱相邻2棵甘蔗<br>
-          ├────┼────┤<br>
-          │ 🌱 │ 🎋 │  ← 🌱相邻3棵甘蔗<br>
-          ├────┼────┤<br>
-          │ 🎋 │ 🌱 │  ← 🌱相邻2棵甘蔗<br>
-          └────┴────┘<br>
-          ✅ 3棵其他作物均与甘蔗相邻，各获得 +Lv×相邻数 产量<br>
-          ✅ 全种甘蔗也生效——3×2网格中每棵甘蔗都与其他甘蔗相邻
+      <!-- Card 2: 第二类道具 -->
+      <div class="panel" style="margin:0;">
+        <h2>🍶 第二类道具</h2>
+        <div class="form-group">
+          <label>道具选择</label>
+          <select id="item2">
+            <option value="none">无</option>
+            <option value="gourd">🍶 醇化葫 — 成熟后额外成长2小时，获得额外产量</option>
+            <option value="sandglass" selected>⏳ 净化沙漏 — 清除异常状态获得额外产量</option>
+            <option value="brush">🖌️ 如意笔 — 改变作物基础属性</option>
+            <option value="bag">🎒 乾坤袋 — 偷菜额外收益（不影响种菜）</option>
+          </select>
+          <div class="note" id="note-item2"></div>
+        </div>
+        <div class="form-group">
+          <label>道具等级</label>
+          <select id="item2Level">
+            <option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option>
+            <option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option><option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option>
+          </select>
+          <div class="note" id="note-item2-lv"></div>
+        </div>
+        <div class="form-group" id="sandglassGroup">
+          <label>⏳ 净化沙漏：预计清除异常次数</label>
+          <select id="sandglassN">
+            <option value="0">0 次</option><option value="1">1 次</option><option value="2" selected>2 次</option><option value="3">3 次</option><option value="4">4 次</option>
+          </select>
+          <div class="note">种植时间越长，触发频率可能越高（如甘蔗比小麦更容易触发），但即使是甘蔗也有可能1次都不触发，可自行估测次数</div>
+        </div>
+        <div class="form-group" id="brushGroup" style="display:none;">
+          <label>🖌️ 如意笔等级</label>
+          <select id="brushLevel">
+            <option value="1" selected>Lv1</option><option value="2">Lv2</option>
+          </select>
+          <div class="note" id="note-brush"></div>
         </div>
       </div>
     </div>
 
-    <div class="panel flex-2">
-      <h2>📈 当前配置收益结果</h2>
+    <div class="flex-2">
+      <!-- 农场操作 -->
+      <div style="display:flex;gap:12px;margin-bottom:12px;">
+        <div class="form-group" style="margin-bottom:0;min-width:120px;">
+          <label>💧 浇水次数</label>
+          <select id="waterCount" onchange="updateCalculator()">
+            <option value="0">0 次</option>
+            <option value="1" selected>1 次（−1h）</option>
+            <option value="2">2 次（−2h）</option>
+            <option value="3">3 次（−3h）</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;min-width:120px;">
+          <label>🪲 除虫次数</label>
+          <select id="pestCount" onchange="updateCalculator()">
+            <option value="-1">长虫了（−1产量）</option>
+            <option value="0">0 次</option>
+            <option value="1" selected>1 次（+1产量）</option>
+            <option value="2">2 次（+2产量）</option>
+            <option value="3">3 次（+3产量）</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>📈 当前配置收益结果</h2>
       <div class="table-wrap"><table>
-        <thead><tr><th>作物</th><th>实际耗时 (h)</th><th>预期产量</th><th>单次利润 (¥)</th><th>每小时利润 (¥/h)</th><th>6块地总利润/h</th></tr></thead>
+        <thead><tr><th>作物</th><th>实际耗时 (h)</th><th>预期产量</th><th>暴击产量 <sup style="color:var(--accent);">*</sup></th><th>单次利润 (¥)</th><th>每小时利润 (¥/h)</th><th>6块地总利润/h</th></tr></thead>
         <tbody id="resultTable"></tbody>
       </table></div>
       <div class="note" style="margin-top:14px;">
-        * 丰收骰子按100%必定触发（种植+收获+异常等多次机会→40%必中一次）。时间最低限制为0.25小时(15分钟)。结果已按总利润/h降序排列。
+        * 时间最低限制为0.25小时(15分钟)。结果已按总利润/h降序排列。<br>
+        <sup style="color:var(--accent);">*</sup> 暴击产量 = round( (基础 + 沙漏 + 葫 + 共生苗) × 2 + 除虫 ) × (1 + 骰子%) 。目前仅验证了沙漏和除虫（沙漏参与翻倍，除虫在翻倍后加），共生苗、葫和骰子是否也按此公式计算待实测确认。
       </div>
     </div>
   </div>
+</div>
 </div>
 
 <!-- ========== TAB 2: COMPARISON ========== -->
 <div class="tab-content" id="tab-compare">
 
+  <!-- TOP: Global Settings -->
   <div class="panel">
-    <h2>📋 6种道具组合收益总览（自定义等级对比）</h2>
+    <h2>⚙️ 全局大前提</h2>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+      <div class="control-item"><label>沙漏触发次数</label><select id="compClearCnt"><option value="0">0次</option><option value="1">1次</option><option value="2" selected>2次</option><option value="3">3次</option><option value="4">4次</option></select></div>
+      <div class="control-item"><label>骰子事件次数</label><select id="compDiceMode"><option value="2">2次≈64%</option><option value="c" selected>必定触发</option></select></div>
+      <div class="control-item"><label>💧 浇水次数</label><select id="compWaterCount"><option value="0">0次</option><option value="1" selected>1次</option><option value="2">2次</option><option value="3">3次</option></select></div>
+      <div class="control-item"><label>🪲 除虫次数</label><select id="compPestCount"><option value="-1">长虫了（−1）</option><option value="0">0次</option><option value="1" selected>1次</option><option value="2">2次</option><option value="3">3次</option></select></div>
+      <div class="control-item"><label>🌿 共生布局</label><select id="compSymbLayout"><option value="1">1🎋+5🌱</option><option value="2" selected>2🎋+4🌱 ⭐</option><option value="3">3🎋+3🌱</option></select></div>
+    </div>
+    <div class="note" style="margin-top:8px;">以上大前提同时作用于下方两个模块的计算结果。</div>
+  </div>
+
+  <!-- MIDDLE: Custom Level Comparison -->
+  <div class="panel">
+    <h2>📋 9种道具组合收益总览（自定义等级对比）</h2>
     <div class="combo-controls" id="comboControls">
       <span style="font-weight:600;color:var(--text);margin-right:4px;white-space:nowrap;font-size:13px;">设置各道具实际等级：</span>
       <div class="control-item"><label>速生钟</label><select id="compClockLv"><option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option><option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option><option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option></select></div>
@@ -417,22 +475,19 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
       <div class="control-item"><label>丰收骰子</label><select id="compDiceLv"><option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option><option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option><option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option></select></div>
       <div class="control-item"><label>醇化葫</label><select id="compGourdLv"><option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option><option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option><option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option></select></div>
       <div class="control-item"><label>净化沙漏</label><select id="compGlassLv"><option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option><option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option><option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option></select></div>
-      <div class="control-item"><label>沙漏触发次数</label><select id="compClearCnt"><option value="1">1次</option><option value="2" selected>2次</option><option value="3">3次</option></select></div>
+      <div class="control-item"><label>如意笔</label><select id="compBrushLv"><option value="1" selected>Lv1</option><option value="2">Lv2</option></select></div>
     </div>
-    <div class="note" style="margin-bottom:14px;">
-      * 纯种行在苗列显示"—"（纯种无共生苗加成）。每行最优标绿，全局最高标红🔴。
-    </div>
+    <div class="note" style="margin-bottom:14px;">每列最优标绿，全局最高标红🔴。现在共9种组合（含如意笔3种）。</div>
     <div class="table-wrap"><table>
       <thead id="comboThead"></thead>
       <tbody id="comboTable"></tbody>
     </table></div>
   </div>
 
+  <!-- BOTTOM: All Lv10 Comparison -->
   <div class="panel">
-    <h2>📋 6种道具组合收益总览（全部等级10）</h2>
-    <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:14px;">
-      <div class="control-item"><label>沙漏触发次数</label><select id="compClearCntMax" onchange="generateMaxLevelTable()"><option value="1">1次</option><option value="2" selected>2次</option><option value="3">3次</option></select></div>
-    </div>
+    <h2>📋 9种道具组合收益总览（全部满级）</h2>
+    <div class="note" style="margin-bottom:14px;">使用上方全局大前提（沙漏次数/骰子模式/浇水/除虫），所有道具等级固定为满级（如意笔Lv2，其余Lv10）。</div>
     <div class="table-wrap"><table>
       <thead id="comboTheadMax"></thead>
       <tbody id="comboTableMax"></tbody>
@@ -448,39 +503,116 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
       肥料 <strong>25金币/个</strong>，每使用1个缩短<strong>1小时</strong>生长时间。可对同一块地使用多个肥料。
       ⚠️ 醇化葫的 +2h 是成熟后额外成长，<strong>肥料对葫的2h无效</strong>，因此带葫时生长时间最低 2.25h。
     </div>
-    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;">
-      <div class="form-group" style="margin-bottom:0;min-width:140px;">
-        <label>选择作物</label>
+
+    <!-- Row 0: Crop + Water + Pest -->
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+      <div class="form-group" style="margin-bottom:0;min-width:120px;">
+        <label>🌱 作物</label>
         <select id="fertCrop" onchange="calcFertilizer()">
           <option value="wheat">🌾 小麦</option><option value="cabbage">🥬 白菜</option>
           <option value="radish">🥕 萝卜</option><option value="pepper" selected>🌶️ 辣椒</option>
           <option value="cane">🎋 甘蔗</option>
         </select>
       </div>
-      <div class="form-group" style="margin-bottom:0;min-width:110px;">
-        <label>速生钟等级</label>
-        <select id="fertBell" onchange="calcFertilizer()">
-          <option value="0" selected>无</option>
-          <option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option>
-          <option value="4">Lv4</option><option value="5">Lv5</option><option value="6">Lv6</option>
-          <option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option>
+      <div class="form-group" style="margin-bottom:0;min-width:120px;">
+        <label>💧 浇水次数</label>
+        <select id="fertWaterCount" onchange="calcFertilizer()">
+          <option value="0">0 次</option>
+          <option value="1" selected>1 次（−1h）</option>
+          <option value="2">2 次（−2h）</option>
+          <option value="3">3 次（−3h）</option>
         </select>
       </div>
-      <div class="form-group" style="margin-bottom:0;min-width:110px;">
-        <label>醇化葫等级</label>
-        <select id="fertGourd" onchange="calcFertilizer()">
-          <option value="0" selected>无</option>
-          <option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option>
-          <option value="4">Lv4</option><option value="5">Lv5</option><option value="6">Lv6</option>
-          <option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option>
+      <div class="form-group" style="margin-bottom:0;min-width:120px;">
+        <label>🪲 除虫次数</label>
+        <select id="fertPestCount" onchange="calcFertilizer()">
+          <option value="-1">长虫了（−1产量）</option>
+          <option value="0">0 次</option>
+          <option value="1" selected>1 次（+1产量）</option>
+          <option value="2">2 次（+2产量）</option>
+          <option value="3">3 次（+3产量）</option>
         </select>
       </div>
     </div>
+
+    <!-- Row 2: Item1 + inline sub-options -->
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:22px;">
+      <div class="form-group" style="margin-bottom:0;min-width:150px;">
+        <label>🔧 第一类道具</label>
+        <select id="fertItem1" onchange="calcFertilizer();updateFertUI();">
+          <option value="none" selected>无</option>
+          <option value="speedBell">🔔 速生钟</option>
+          <option value="symbiotic">🌿 共生苗</option>
+          <option value="harvestDice">🎲 丰收骰子</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0;min-width:85px;position:relative;" id="fertItem1LevelG">
+        <label>等级</label>
+        <select id="fertItem1Level" onchange="calcFertilizer()">
+          <option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option>
+          <option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option>
+          <option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option>
+        </select>
+        <div class="note" id="fert-note-item1-lv" style="position:absolute;top:100%;left:0;right:0;font-size:11px;line-height:1.1;white-space:nowrap;"></div>
+      </div>
+      <!-- Item1 sub: symbiotic -->
+      <div class="form-group" style="margin-bottom:0;min-width:120px;" id="fertSymbGroup" hidden>
+        <label>🌿 是否相邻甘蔗</label>
+        <select id="fertSymAdj" onchange="calcFertilizer()">
+          <option value="0">否</option><option value="1" selected>是</option>
+        </select>
+      </div>
+      <!-- Item1 sub: harvest dice -->
+      <div class="form-group" style="margin-bottom:0;min-width:200px;" id="fertDiceGroup" hidden>
+        <label>🎲 触发事件次数</label>
+        <select id="fertDiceMode" onchange="calcFertilizer()">
+          <option value="2">2次事件 ≈64%触发</option>
+          <option value="c" selected>必定触发（100%）</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Row 3: Item2 + inline sub-options -->
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:24px;">
+      <div class="form-group" style="margin-bottom:0;min-width:150px;">
+        <label>🔧 第二类道具</label>
+        <select id="fertItem2" onchange="calcFertilizer();updateFertUI();">
+          <option value="none" selected>无</option>
+          <option value="gourd">🍶 醇化葫</option>
+          <option value="sandglass">⏳ 净化沙漏</option>
+          <option value="brush">🖌️ 如意笔</option>
+          <option value="bag">🎒 乾坤袋（同无）</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0;min-width:85px;position:relative;" id="fertItem2LevelG">
+        <label>等级</label>
+        <select id="fertItem2Level" onchange="calcFertilizer()">
+          <option value="1">Lv1</option><option value="2">Lv2</option><option value="3">Lv3</option>
+          <option value="4">Lv4</option><option value="5" selected>Lv5</option><option value="6">Lv6</option>
+          <option value="7">Lv7</option><option value="8">Lv8</option><option value="9">Lv9</option><option value="10">Lv10</option>
+        </select>
+        <div class="note" id="fert-note-item2-lv" style="position:absolute;top:100%;left:0;right:0;font-size:11px;line-height:1.1;white-space:nowrap;"></div>
+      </div>
+      <!-- Item2 sub: sandglass -->
+      <div class="form-group" style="margin-bottom:0;min-width:130px;" id="fertSandGroup" hidden>
+        <label>⏳ 清除异常次数</label>
+        <select id="fertSandN" onchange="calcFertilizer()">
+          <option value="0">0 次</option><option value="1">1 次</option><option value="2" selected>2 次</option><option value="3">3 次</option><option value="4">4 次</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0;min-width:85px;" id="fertBrushGroup" hidden>
+        <label>🖌️ 如意笔等级</label>
+        <select id="fertBrushLevel" onchange="calcFertilizer()">
+          <option value="1" selected>Lv1</option><option value="2">Lv2</option>
+        </select>
+      </div>
+    </div>
+
     <div class="table-wrap"><table>
       <thead><tr><th>肥料数量</th><th>生长时间 (h)</th><th>肥料成本 (¥)</th><th>净利润 (¥/h)</th><th>相比不用多赚 (¥/h)</th><th>备注</th></tr></thead>
       <tbody id="fertTableBody"></tbody>
     </table></div>
-    <div class="note" style="margin-top:8px;">* 净利润 = (产量×单价 − 肥料成本 − 种子成本) / 时间。绿色行为最优。</div>
+    <div class="note" style="margin-top:8px;">* 净利润 = (产量×单价 − 肥料成本 − 种子成本) / 时间。最优行标绿。</div>
   </div>
 </div>
 
@@ -511,21 +643,54 @@ var crops = [
 
 var sandglassPcts = [0, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16];
 
-// ===================== CORE CALC =====================
-// symAdjCount = number of adjacent sugarcane (0-4), bonus per plant = lv1 × symAdjCount
-// 全甘蔗 3×2: 4角各2邻 + 2边各3邻 → 平均14/6=7/3 ≈ 2.333
-// 3+3混种: 2非甘蔗各2邻 + 1非甘蔗3邻 → 平均7/3 ≈ 2.333，甘蔗0邻
-function calcCropStats(crop, item1, lv1, item2, lv2, sandN, symAdjCount) {
-  var t = crop.time;
-  var y = crop.yield;
+// 如意笔: override crop base stats per level and crop key
+var brushStats = {
+  1: {
+    wheat:   { time: 6,   yield: 15, price: 5  },
+    cabbage: { time: 8,   yield: 26, price: 9  },
+    radish:  { time: 9.4, yield: 15, price: 17 },
+    pepper:  { time: 12,  yield: 45, price: 9  },
+    cane:    { time: 24,  yield: 34, price: 20 }
+  },
+  2: {
+    wheat:   { time: 6,   yield: 15, price: 5  },
+    cabbage: { time: 8,   yield: 28, price: 10 },
+    radish:  { time: 8.3, yield: 15, price: 17 },
+    pepper:  { time: 12,  yield: 45, price: 11 },
+    cane:    { time: 24,  yield: 42, price: 20 }
+  }
+};
 
-  // Cat1
+// ===================== CORE CALC =====================
+// 共生苗效果不可叠加：相邻即+lv1一次。行布局(3🎋+3其他)：所有植株均相邻甘蔗
+// diceMode: '2'=2次事件(~64%), 'c'=100%必定触发(默认)
+// 骰子是总产量乘法，作用于所有其他加成之后
+function calcCropStats(crop, item1, lv1, item2, lv2, sandN, symAdjCount, diceMode, waterCount, pestCount) {
+  // 如意笔: override base stats before all other calculations
+  var baseTime = crop.time;
+  var baseYield = crop.yield;
+  var basePrice = crop.price;
+  if (item2 === 'brush' && brushStats[lv2] && brushStats[lv2][crop.key]) {
+    var b = brushStats[lv2][crop.key];
+    baseTime = b.time;
+    baseYield = b.yield;
+    basePrice = b.price;
+  }
+
+  var t = baseTime;
+  var y = baseYield;
+
+  // Farm operations: watering and pest removal (before all item effects)
+  waterCount = waterCount || 0;
+  pestCount = pestCount || 0;
+  t -= waterCount * 1;
+  y += pestCount * 1;
+
+  // Cat1 (non-dice effects)
   if (item1 === 'speedBell') {
     t -= (lv1 + 1) * 0.25;
-  } else if (item1 === 'harvestDice') {
-    y += crop.yield * 0.05 * lv1; // 40%×多次触发≈100%触发一次
   } else if (item1 === 'symbiotic' && symAdjCount > 0) {
-    y += lv1 * symAdjCount;
+    y += lv1;  // 非叠加：相邻即+lv1，不乘相邻数
   }
 
   // Cat2
@@ -533,15 +698,32 @@ function calcCropStats(crop, item1, lv1, item2, lv2, sandN, symAdjCount) {
     t += 2;
     y += (lv2 + 1);
   } else if (item2 === 'sandglass') {
-    y += crop.yield * (sandglassPcts[lv2] / 100) * sandN;
+    y += Math.round(baseYield * (sandglassPcts[lv2] / 100)) * sandN;
+  }
+
+  // Cat1 dice: multiplier on total yield (applied AFTER all other additions)
+  if (item1 === 'harvestDice') {
+    var diceP = (diceMode === 'c') ? 1.0 : (1 - Math.pow(0.6, parseInt(diceMode) || 2));
+    y = Math.round(y * (1 + diceP * 0.05 * lv1));
+  }
+
+  // Crit (double) yield: (base + sandglass + gourd + symbiotic) ×2 + pest, then dice
+  var yCrit = baseYield;
+  if (item1 === 'symbiotic' && symAdjCount > 0) yCrit += lv1;  // 非叠加
+  if (item2 === 'gourd') yCrit += (lv2 + 1);
+  if (item2 === 'sandglass') yCrit += Math.round(baseYield * (sandglassPcts[lv2] / 100)) * sandN;
+  yCrit = yCrit * 2;  // double: (base + all growth bonuses) × 2
+  yCrit += (pestCount || 0) * 1;  // pest added after double
+  if (item1 === 'harvestDice') {
+    yCrit = Math.round(yCrit * (1 + diceP * 0.05 * lv1));
   }
 
   if (t < 0.25) t = 0.25;
 
-  var profit = (y * crop.price) - crop.cost;
+  var profit = (y * basePrice) - crop.cost;
   var pph = profit / t;
 
-  return { time:t, yield:y, profit:profit, pph:pph };
+  return { time:t, yield:y, critYield:yCrit, profit:profit, pph:pph };
 }
 
 // ===================== HELPERS =====================
@@ -563,83 +745,120 @@ function switchTab(name) {
   if (name === 'thief') updateThief();
 }
 
+// ===================== SYMBIOTIC DIAGRAM =====================
+function updateSymbioticDiagram() {
+  var a = parseInt(document.getElementById('symbioticLayout').value) || 2;
+  var diagrams = {
+    1: '│ 🌱 │ 🌱 │\n│ 🎋 │ 🌱 │\n│ 🌱 │ 🌱 │\n⚠ 仅3/6加成：B,C,F获得加成',
+    2: '│ 🌱 │ 🌱 │\n│ 🎋 │ 🎋 │\n│ 🌱 │ 🌱 │\n✅ 2🎋中排, 6/6全覆盖 ⭐推荐',
+    3: '│ 🎋 │ 🌱 │\n│ 🎋 │ 🌱 │\n│ 🎋 │ 🌱 │\n✅ 左列串连, 6/6全覆盖',
+    4: '│ 🌱 │ 🌱 │\n│ 🎋 │ 🎋 │\n│ 🎋 │ 🎋 │\n✅ 6/6全覆盖',
+    5: '│ 🌱 │ 🎋 │\n│ 🎋 │ 🎋 │\n│ 🎋 │ 🎋 │\n✅ 6/6全覆盖',
+    6: '│ 🎋 │ 🎋 │\n│ 🎋 │ 🎋 │\n│ 🎋 │ 🎋 │\n✅ 全甘蔗, 6/6全覆盖'
+  };
+  var d = diagrams[a] || diagrams[2];
+  document.getElementById('symbioticDiagram').innerHTML = '<pre style=\"margin:0;line-height:1.6;\">' + d + '</pre>';
+}
+
 // ===================== LEFT CALCULATOR =====================
 function updateCalculator() {
   var item1 = document.getElementById('item1').value;
   var lv1 = parseInt(document.getElementById('item1Level').value) || 1;
   var item2 = document.getElementById('item2').value;
-  var lv2 = parseInt(document.getElementById('item2Level').value) || 1;
+  var lv2 = (item2 === 'brush') ? parseInt(document.getElementById('brushLevel').value) || 1 : parseInt(document.getElementById('item2Level').value) || 1;
   var sandN = parseInt(document.getElementById('sandglassN').value) || 1;
+  var diceMode = document.getElementById('diceMode').value || 'c';
+  var waterCount = parseInt(document.getElementById('waterCount').value) || 0;
+  var pestCount = parseInt(document.getElementById('pestCount').value) || 0;
 
   // Show/hide
   document.getElementById('sandglassGroup').style.display = (item2 === 'sandglass') ? 'block' : 'none';
+  document.getElementById('brushGroup').style.display = (item2 === 'brush') ? 'block' : 'none';
   document.getElementById('symbioticGroup').style.display = (item1 === 'symbiotic') ? 'block' : 'none';
+  document.getElementById('diceModeGroup').style.display = (item1 === 'harvestDice') ? 'block' : 'none';
   document.getElementById('item1Level').style.display = (item1 === 'none') ? 'none' : '';
-  document.getElementById('item2Level').style.display = (item2 === 'none' || item2 === 'bag') ? 'none' : '';
+  document.getElementById('item2Level').style.display = (item2 === 'none' || item2 === 'bag' || item2 === 'brush') ? 'none' : '';
+
+  // Update symbiotic layout diagram
+  if (item1 === 'symbiotic') updateSymbioticDiagram();
 
   // Notes
   var note1 = document.getElementById('note-item1');
   if (item1 === 'none') note1.textContent = '不使用第一类道具';
   else if (item1 === 'speedBell') note1.textContent = '缩短生长时间 (等级+1)×15分钟。Lv1减30分钟，Lv3减60分钟，Lv10减165分钟(2.75h)';
-  else if (item1 === 'symbiotic') note1.textContent = '3🎋+3其他网格布局，与甘蔗相邻的"其他作物"增加 等级×相邻数 点产量。全甘蔗也生效。';
-  else if (item1 === 'harvestDice') note1.textContent = '种植+收获必各触发一次，加上清除异常/被偷菜等，40%概率×多次≈100%触发一次。实际按必定触发计算：产量×5%×等级';
+  else if (item1 === 'symbiotic') note1.textContent = '与甘蔗相邻的作物获得 +等级 产量（不可叠加）。因作物时间不统一，无法给出单一耗时/产量，按每块地利润/h之和计算。布局与收益详见 共生苗详解.md';
+  else if (item1 === 'harvestDice') note1.textContent = '种植/收获/清除异常/被偷菜等行为有40%概率增加5%×等级的产量，仅生效1次。';
 
   var note2 = document.getElementById('note-item2');
   if (item2 === 'none') note2.textContent = '不使用第二类道具';
   else if (item2 === 'gourd') note2.textContent = '成熟后额外成长2小时，额外获得 (1+等级) 点产量。Lv1=+2, Lv10=+11';
   else if (item2 === 'sandglass') note2.textContent = '清除异常时获得基础产量×对应%的额外收益。Lv1=3%, Lv5=9%, Lv10=16%。可多次触发';
+  else if (item2 === 'brush') note2.textContent = '改变作物基础属性（时间/产量/单价）。Lv1/Lv2各不同，详见README §4.3。';
   else if (item2 === 'bag') note2.textContent = '偷菜额外收益，不影响种菜，此处等同于"无"';
+
+  // Level-specific notes
+  var noteLv1 = document.getElementById('note-item1-lv');
+  if (item1 === 'speedBell') noteLv1.textContent = '缩短 ' + ((lv1+1)*15) + ' 分钟 (' + ((lv1+1)*0.25).toFixed(2) + 'h)';
+  else if (item1 === 'symbiotic') noteLv1.textContent = '相邻作物 +' + lv1 + ' 产量（不可叠加）';
+  else if (item1 === 'harvestDice') noteLv1.textContent = '触发时总产量 × (1 + ' + (lv1*5) + '%)';
+  else noteLv1.textContent = '';
+
+  var noteLv2 = document.getElementById('note-item2-lv');
+  if (item2 === 'gourd') noteLv2.textContent = '额外 +' + (lv2+1) + ' 产量（成熟后+2h）';
+  else if (item2 === 'sandglass') noteLv2.textContent = '每次清除：基础产量 × ' + sandglassPcts[lv2] + '%（四舍五入）';
+  else noteLv2.textContent = '';
+
+  // Brush note
+  var noteBrush = document.getElementById('note-brush');
+  if (item2 === 'brush') {
+    if (lv2 === 1) noteBrush.textContent = 'Lv1: 白菜产量+1单价+1, 萝卜时间−0.6h, 辣椒单价+1, 甘蔗时间+2h产量+6';
+    else noteBrush.textContent = 'Lv2: 白菜产量+3单价+2, 萝卜时间−1.7h, 辣椒单价+3, 甘蔗时间+2h产量+14';
+  }
 
   // ===== COMPUTE =====
   var results = [];
 
   if (item1 === 'symbiotic') {
-    // ===== SYMBIOTIC MODE: ONLY 3+3 mixed + 全甘蔗 =====
-    var caneStats = calcCropStats(crops[4], item1, lv1, item2, lv2, sandN, 0); // 3+3中甘蔗无甘蔗邻居
-
-    // 3🎋+3其他 for each non-cane crop
-    for (var j = 0; j < 4; j++) {
-      var other = crops[j];
-      var otherStats = calcCropStats(other, item1, lv1, item2, lv2, sandN, 7/3); // 3+3非甘蔗平均：(2+2+3)/3=7/3邻
-
-      // LCM in quarter-hours
-      var t1q = Math.round(caneStats.time * 4);
-      var t2q = Math.round(otherStats.time * 4);
-      var lcmQ = t1q * t2q / gcd(t1q, t2q);
-      var period = lcmQ / 4;
-      var n1 = lcmQ / t1q;
-      var n2 = lcmQ / t2q;
-
-      var totalProfit = caneStats.profit * n1 * 3 + otherStats.profit * n2 * 3;
-      var totalPph = totalProfit / period;
-      var perPlotPph = totalPph / 6;
-
-      results.push({
-        type: 'symbiotic',
-        name: '🌿 3🎋 + 3' + other.emoji + other.name,
-        cane: caneStats, caneN: n1,
-        other: otherStats, otherN: n2,
-        otherEmoji: other.emoji,
-        period: period,
-        totalProfit: totalProfit,
-        totalPph: totalPph,
-        perPlotPph: perPlotPph
-      });
+    // ===== SYMBIOTIC MODE: per-plot profit/h sum (see 共生苗详解.md 四) =====
+    var a = parseInt(document.getElementById('symbioticLayout').value) || 2;
+    
+    if (a === 6) {
+      // 全甘蔗×6 — all cane get bonus (adjacent to each other)
+      var caneAll = calcCropStats(crops[4], item1, lv1, item2, lv2, sandN, 1, diceMode, waterCount, pestCount);
+      results.push({ type: 'pure', name: '全🎋×6', stats: caneAll });
+    } else {
+      // Cane stats: with bonus if a>=2 (adjacent to another cane), no bonus if a=1
+      var caneSymAdj = (a >= 2) ? 1 : 0;
+      var caneStats = calcCropStats(crops[4], item1, lv1, item2, lv2, sandN, caneSymAdj, diceMode, waterCount, pestCount);
+      
+      for (var j = 0; j < 4; j++) {
+        var other = crops[j];
+        var totalPph;
+        
+        if (a === 1) {
+          // a=1: 1 cane(no bonus) + 3 crop(with bonus) + 2 crop(no bonus)
+          var cropBonus = calcCropStats(other, item1, lv1, item2, lv2, sandN, 1, diceMode, waterCount, pestCount);
+          var cropNoBonus = calcCropStats(other, item1, lv1, item2, lv2, sandN, 0, diceMode, waterCount, pestCount);
+          totalPph = caneStats.pph + 3 * cropBonus.pph + 2 * cropNoBonus.pph;
+        } else {
+          // a>=2: a cane(with bonus) + (6-a) crop(with bonus), all 6/6 coverage
+          var cropAll = calcCropStats(other, item1, lv1, item2, lv2, sandN, 1, diceMode, waterCount, pestCount);
+          totalPph = a * caneStats.pph + (6 - a) * cropAll.pph;
+        }
+        
+        results.push({
+          type: 'symbiotic',
+          name: '🌿 ' + a + '🎋 + ' + (6-a) + other.emoji + other.name,
+          totalPph: totalPph,
+          perPlotPph: totalPph / 6
+        });
+      }
     }
-
-    // 全甘蔗×6 — 实测有效（3×2网格中甘蔗之间也相邻）
-    var caneBonus = calcCropStats(crops[4], item1, lv1, item2, lv2, sandN, 14/6);
-    results.push({
-      type: 'pure',
-      name: '全🎋×6',
-      stats: caneBonus
-    });
-
   } else {
     // ===== NORMAL MODE: pure planting for each crop =====
     for (var i = 0; i < crops.length; i++) {
       var crop = crops[i];
-      var stats = calcCropStats(crop, item1, lv1, item2, lv2, sandN, 0);
+      var stats = calcCropStats(crop, item1, lv1, item2, lv2, sandN, 0, diceMode, waterCount, pestCount);
       results.push({ name: crop.emoji + ' ' + crop.name + ' ×6', cropKey: crop.key, stats: stats, type: 'pure' });
     }
   }
@@ -665,17 +884,20 @@ function updateCalculator() {
       tr.innerHTML =
         '<td' + testStyle + '>' + r.name + noteHtml + '</td>' +
         '<td>' + r.stats.time.toFixed(2) + ' h</td>' +
-        '<td>' + r.stats.yield.toFixed(1) + '</td>' +
+        '<td>' + r.stats.yield.toFixed(0) + '</td>' +
+        '<td>' + r.stats.critYield.toFixed(0) + '</td>' +
         '<td>¥' + r.stats.profit.toFixed(2) + '</td>' +
         '<td class="highlight">¥' + r.stats.pph.toFixed(2) + '/h</td>' +
         '<td class="highlight">¥' + (r.stats.pph * 6).toFixed(2) + '/h</td>';
     } else {
+      // Symbiotic row: same columns as pure, showing per-plot and 6-plot total
       tr.innerHTML =
-        '<td><b>' + r.name + '</b> <span class="combo-tag">3+3</span></td>' +
-        '<td style="font-size:12px;">周期 ' + r.period.toFixed(1) + 'h<br><small style="color:var(--text2);">🎋' + r.cane.time.toFixed(1) + 'h×' + r.caneN + '轮 + ' + r.otherEmoji + r.other.time.toFixed(1) + 'h×' + r.otherN + '轮</small></td>' +
-        '<td style="font-size:12px;"><small>🎋' + r.cane.yield.toFixed(1) + '×' + r.caneN + '=' + (r.cane.yield * r.caneN).toFixed(0) + '<br>' + r.otherEmoji + r.other.yield.toFixed(1) + '×' + r.otherN + '=' + (r.other.yield * r.otherN).toFixed(0) + '</small></td>' +
-        '<td style="font-size:12px;">¥' + r.totalProfit.toFixed(0) + '<br><small style="color:var(--text2);">周期总利润</small></td>' +
-        '<td class="highlight">¥' + r.perPlotPph.toFixed(2) + '/h<br><small style="color:var(--text2);">等效单株</small></td>' +
+        '<td><b>' + r.name + '</b></td>' +
+        '<td>—</td>' +
+        '<td>—</td>' +
+        '<td>—</td>' +
+        '<td>—</td>' +
+        '<td class="highlight">¥' + r.perPlotPph.toFixed(2) + '/h</td>' +
         '<td class="highlight">¥' + r.totalPph.toFixed(2) + '/h</td>';
     }
     tbody.appendChild(tr);
@@ -683,14 +905,19 @@ function updateCalculator() {
 }
 
 // ===================== COMPARISON TABLE =====================
-function renderComboTable(cClock, cSymb, cDice, cGourd, cGlass, cClear, theadId, tbodyId) {
+function renderComboTable(cClock, cSymb, cDice, cGourd, cGlass, cBrush, cClear, cDiceMode, cWater, cPest, cSymbLayout, theadId, tbodyId) {
+  var ITEM1_LABEL = { speedBell: '🔔钟', symbiotic: '🌿苗', harvestDice: '🎲骰' };
+  var ITEM2_LABEL = { gourd: '🍶葫', sandglass: '⏳漏', brush: '🖌️笔', bag: '🎒袋', none: '无' };
   var combos = [
-    { i1:'speedBell', lv1:cClock,  i2:'gourd',     lv2:cGourd, name:'极限压缩流',  short:'钟Lv'+cClock+' + 葫Lv'+cGourd },
-    { i1:'symbiotic', lv1:cSymb,   i2:'gourd',     lv2:cGourd, name:'甘蔗高产流',  short:'苗Lv'+cSymb+' + 葫Lv'+cGourd },
-    { i1:'harvestDice', lv1:cDice, i2:'gourd',     lv2:cGourd, name:'佛系玄学流',  short:'骰Lv'+cDice+' + 葫Lv'+cGourd },
-    { i1:'speedBell', lv1:cClock,  i2:'sandglass', lv2:cGlass, name:'高频爆产流',  short:'钟Lv'+cClock+' + 漏Lv'+cGlass },
-    { i1:'symbiotic', lv1:cSymb,   i2:'sandglass', lv2:cGlass, name:'甘蔗核心流',  short:'苗Lv'+cSymb+' + 漏Lv'+cGlass },
-    { i1:'harvestDice', lv1:cDice, i2:'sandglass', lv2:cGlass, name:'赌狗极限流',  short:'骰Lv'+cDice+' + 漏Lv'+cGlass }
+    { i1:'speedBell',   lv1:cClock,  i2:'gourd',     lv2:cGourd },
+    { i1:'speedBell',   lv1:cClock,  i2:'sandglass', lv2:cGlass },
+    { i1:'speedBell',   lv1:cClock,  i2:'brush',     lv2:cBrush },
+    { i1:'symbiotic',   lv1:cSymb,   i2:'gourd',     lv2:cGourd },
+    { i1:'symbiotic',   lv1:cSymb,   i2:'sandglass', lv2:cGlass },
+    { i1:'symbiotic',   lv1:cSymb,   i2:'brush',     lv2:cBrush },
+    { i1:'harvestDice', lv1:cDice,   i2:'gourd',     lv2:cGourd },
+    { i1:'harvestDice', lv1:cDice,   i2:'sandglass', lv2:cGlass },
+    { i1:'harvestDice', lv1:cDice,   i2:'brush',     lv2:cBrush }
   ];
 
   var allRows = [];
@@ -705,7 +932,7 @@ function renderComboTable(cClock, cSymb, cDice, cGourd, cGlass, cClear, theadId,
       if (combo.i1 === 'symbiotic') {
         vals.push(null);
       } else {
-        var stats = calcCropStats(crop, combo.i1, combo.lv1, combo.i2, combo.lv2, cClear, 0);
+        var stats = calcCropStats(crop, combo.i1, combo.lv1, combo.i2, combo.lv2, cClear, 0, cDiceMode, cWater, cPest);
         vals.push(stats.pph);
         if (stats.pph > globalMax) globalMax = stats.pph;
       }
@@ -713,23 +940,31 @@ function renderComboTable(cClock, cSymb, cDice, cGourd, cGlass, cClear, theadId,
     allRows.push({ label: crop.emoji + ' ' + crop.name + ' ×6', labelStyle: '', values: vals });
   }
 
-  // Symbiotic 3+3 (4 rows)
+  // Symbiotic mix (per selected layout)
   for (var oi = 0; oi < 4; oi++) {
     var otherCrop = crops[oi];
     var vals3 = [];
     for (var dj = 0; dj < combos.length; dj++) {
       var combo3 = combos[dj];
       if (combo3.i1 === 'symbiotic') {
-        var cs = calcCropStats(crops[4], combo3.i1, combo3.lv1, combo3.i2, combo3.lv2, cClear, 0);
-        var os = calcCropStats(otherCrop, combo3.i1, combo3.lv1, combo3.i2, combo3.lv2, cClear, 7/3);
-        var tp = (cs.pph * 3 + os.pph * 3) / 6;
+        var caneSymAdj = (cSymbLayout >= 2) ? 1 : 0;
+        var cs = calcCropStats(crops[4], combo3.i1, combo3.lv1, combo3.i2, combo3.lv2, cClear, caneSymAdj, cDiceMode, cWater, cPest);
+        var tp;
+        if (cSymbLayout === 1) {
+          var osBonus = calcCropStats(otherCrop, combo3.i1, combo3.lv1, combo3.i2, combo3.lv2, cClear, 1, cDiceMode, cWater, cPest);
+          var osNoBonus = calcCropStats(otherCrop, combo3.i1, combo3.lv1, combo3.i2, combo3.lv2, cClear, 0, cDiceMode, cWater, cPest);
+          tp = (cs.pph + 3 * osBonus.pph + 2 * osNoBonus.pph) / 6;
+        } else {
+          var osAll = calcCropStats(otherCrop, combo3.i1, combo3.lv1, combo3.i2, combo3.lv2, cClear, 1, cDiceMode, cWater, cPest);
+          tp = (cSymbLayout * cs.pph + (6 - cSymbLayout) * osAll.pph) / 6;
+        }
         vals3.push(tp);
         if (tp > globalMax) globalMax = tp;
       } else {
         vals3.push(null);
       }
     }
-    allRows.push({ label: '🌿 3🎋+3' + otherCrop.emoji + ' ' + otherCrop.name, labelStyle: 'color:var(--gold);', values: vals3 });
+    allRows.push({ label: '🌿 ' + cSymbLayout + '🎋+' + (6-cSymbLayout) + otherCrop.emoji + ' ' + otherCrop.name, labelStyle: 'color:var(--gold);', values: vals3 });
   }
 
   // All cane
@@ -737,7 +972,7 @@ function renderComboTable(cClock, cSymb, cDice, cGourd, cGlass, cClear, theadId,
   for (var ej = 0; ej < combos.length; ej++) {
     var comboE = combos[ej];
     if (comboE.i1 === 'symbiotic') {
-      var csb = calcCropStats(crops[4], comboE.i1, comboE.lv1, comboE.i2, comboE.lv2, cClear, 14/6);
+      var csb = calcCropStats(crops[4], comboE.i1, comboE.lv1, comboE.i2, comboE.lv2, cClear, 1, cDiceMode, cWater, cPest);
       valsCane.push(csb.pph);
       if (csb.pph > globalMax) globalMax = csb.pph;
     } else {
@@ -747,12 +982,11 @@ function renderComboTable(cClock, cSymb, cDice, cGourd, cGlass, cClear, theadId,
   allRows.push({ label: '全🎋×6', labelStyle: '', values: valsCane });
 
   // Render header
-  var nums = ['①','②','③','④','⑤','⑥'];
   var thead = document.getElementById(theadId);
   var headHtml = '<tr><th style="background:#1f2937;">作物</th>';
   for (var ci = 0; ci < combos.length; ci++) {
     var c = combos[ci];
-    headHtml += '<th>' + nums[ci] + ' ' + c.name + '<br><span style="font-size:11px;font-weight:normal;opacity:0.8;">(' + c.short + ')</span></th>';
+    headHtml += '<th>' + ITEM1_LABEL[c.i1] + 'Lv' + c.lv1 + '<br>' + ITEM2_LABEL[c.i2] + 'Lv' + c.lv2 + '</th>';
   }
   headHtml += '</tr>';
   thead.innerHTML = headHtml;
@@ -761,15 +995,20 @@ function renderComboTable(cClock, cSymb, cDice, cGourd, cGlass, cClear, theadId,
   var tbody = document.getElementById(tbodyId);
   tbody.innerHTML = '';
 
+  // Compute column maxes
+  var colMaxes = [];
+  for (var cm = 0; cm < combos.length; cm++) {
+    var cmax = -Infinity;
+    for (var ri = 0; ri < allRows.length; ri++) {
+      var rv = allRows[ri].values[cm];
+      if (rv !== null && rv > cmax) cmax = rv;
+    }
+    colMaxes.push(cmax);
+  }
+
   for (var ai = 0; ai < allRows.length; ai++) {
     var row = allRows[ai];
     var tr = document.createElement('tr');
-
-    var rowMax = -Infinity;
-    for (var am = 0; am < row.values.length; am++) {
-      var vm = row.values[am];
-      if (vm !== null && vm > rowMax) rowMax = vm;
-    }
 
     var html = '<td style="' + row.labelStyle + '"><b>' + row.label + '</b></td>';
 
@@ -779,10 +1018,10 @@ function renderComboTable(cClock, cSymb, cDice, cGourd, cGlass, cClear, theadId,
         html += '<td style="color:var(--text2);font-size:11px;">—</td>';
       } else {
         var isGlobalBest = Math.abs(v - globalMax) < 0.005;
-        var isRowBest = Math.abs(v - rowMax) < 0.005;
+        var isColBest = Math.abs(v - colMaxes[ak]) < 0.005;
         if (isGlobalBest) {
           html += '<td class="global-best">🔴 ¥' + v.toFixed(2) + '/h</td>';
-        } else if (isRowBest) {
+        } else if (isColBest) {
           html += '<td class="best-cell">¥' + v.toFixed(2) + '/h</td>';
         } else {
           html += '<td>¥' + v.toFixed(2) + '/h</td>';
@@ -793,40 +1032,6 @@ function renderComboTable(cClock, cSymb, cDice, cGourd, cGlass, cClear, theadId,
     tr.innerHTML = html;
     tbody.appendChild(tr);
   }
-
-  // Bottom summary
-  var summaryTr = document.createElement('tr');
-  summaryTr.style.borderTop = '2px solid var(--text)';
-  var summaryHtml = '<td style="font-weight:700;">🏆 该列最优</td>';
-
-  for (var sm = 0; sm < combos.length; sm++) {
-    var comboSm = combos[sm];
-    var bestPph = -Infinity;
-    var bestName = '';
-
-    if (comboSm.i1 === 'symbiotic') {
-      for (var so = 0; so < 4; so++) {
-        var oc = crops[so];
-        var cs2 = calcCropStats(crops[4], comboSm.i1, comboSm.lv1, comboSm.i2, comboSm.lv2, cClear, 0);
-        var os2 = calcCropStats(oc, comboSm.i1, comboSm.lv1, comboSm.i2, comboSm.lv2, cClear, 7/3);
-        var tp = (cs2.pph * 3 + os2.pph * 3) / 6;
-        if (tp > bestPph) { bestPph = tp; bestName = '3🎋+3' + oc.emoji + oc.name; }
-      }
-      var caneAll = calcCropStats(crops[4], comboSm.i1, comboSm.lv1, comboSm.i2, comboSm.lv2, cClear, 14/6);
-      if (caneAll.pph > bestPph) { bestPph = caneAll.pph; bestName = '全🎋×6'; }
-    } else {
-      for (var sc = 0; sc < crops.length; sc++) {
-        var cropSc = crops[sc];
-        var st = calcCropStats(cropSc, comboSm.i1, comboSm.lv1, comboSm.i2, comboSm.lv2, cClear, 0);
-        if (st.pph > bestPph) { bestPph = st.pph; bestName = cropSc.emoji + cropSc.name + '×6'; }
-      }
-    }
-
-    summaryHtml += '<td style="font-weight:600;font-size:12px;">' + bestName + '<br><span style="color:var(--highlight);">¥' + bestPph.toFixed(2) + '/h</span></td>';
-  }
-
-  summaryTr.innerHTML = summaryHtml;
-  tbody.appendChild(summaryTr);
 }
 
 function generateComboTable() {
@@ -835,13 +1040,22 @@ function generateComboTable() {
   var cDice   = parseInt(document.getElementById('compDiceLv').value) || 1;
   var cGourd  = parseInt(document.getElementById('compGourdLv').value) || 1;
   var cGlass  = parseInt(document.getElementById('compGlassLv').value) || 1;
+  var cBrush  = parseInt(document.getElementById('compBrushLv').value) || 1;
   var cClear  = parseInt(document.getElementById('compClearCnt').value) || 1;
-  renderComboTable(cClock, cSymb, cDice, cGourd, cGlass, cClear, 'comboThead', 'comboTable');
+  var cDiceMode = document.getElementById('compDiceMode').value || 'c';
+  var cWater = parseInt(document.getElementById('compWaterCount').value) || 1;
+  var cPest = parseInt(document.getElementById('compPestCount').value) || 1;
+  var cSymbLayout = parseInt(document.getElementById('compSymbLayout').value) || 2;
+  renderComboTable(cClock, cSymb, cDice, cGourd, cGlass, cBrush, cClear, cDiceMode, cWater, cPest, cSymbLayout, 'comboThead', 'comboTable');
 }
 
 function generateMaxLevelTable() {
-  var cClear = parseInt(document.getElementById('compClearCntMax').value) || 2;
-  renderComboTable(10, 10, 10, 10, 10, cClear, 'comboTheadMax', 'comboTableMax');
+  var cClear = parseInt(document.getElementById('compClearCnt').value) || 2;
+  var cDiceMode = document.getElementById('compDiceMode').value || 'c';
+  var cWater = parseInt(document.getElementById('compWaterCount').value) || 1;
+  var cPest = parseInt(document.getElementById('compPestCount').value) || 1;
+  var cSymbLayout = parseInt(document.getElementById('compSymbLayout').value) || 2;
+  renderComboTable(10, 10, 10, 10, 10, 2, cClear, cDiceMode, cWater, cPest, cSymbLayout, 'comboTheadMax', 'comboTableMax');
 }
 
 // ===================== THEME =====================
@@ -863,6 +1077,19 @@ if (localStorage.getItem('theme') === 'dark') {
 }
 
 // ===================== FERTILIZER =====================
+function updateFertUI() {
+  var item1 = document.getElementById('fertItem1').value;
+  var item2 = document.getElementById('fertItem2').value;
+
+  document.getElementById('fertItem1LevelG').style.display = (item1 === 'none') ? 'none' : '';
+  document.getElementById('fertSymbGroup').hidden = (item1 !== 'symbiotic');
+  document.getElementById('fertDiceGroup').hidden = (item1 !== 'harvestDice');
+
+  document.getElementById('fertItem2LevelG').style.display = (item2 === 'none' || item2 === 'bag' || item2 === 'brush') ? 'none' : '';
+  document.getElementById('fertSandGroup').hidden = (item2 !== 'sandglass');
+  document.getElementById('fertBrushGroup').hidden = (item2 !== 'brush');
+}
+
 function calcFertilizer() {
   var fertCropKey = document.getElementById('fertCrop').value;
   var crop = null;
@@ -871,28 +1098,79 @@ function calcFertilizer() {
   }
   if (!crop) return;
 
-  var bellLv = parseInt(document.getElementById('fertBell').value) || 0;
-  var gourdLv = parseInt(document.getElementById('fertGourd').value) || 0;
+  var item1 = document.getElementById('fertItem1').value;
+  var lv1 = parseInt(document.getElementById('fertItem1Level').value) || 1;
+  var item2 = document.getElementById('fertItem2').value;
+  var lv2 = parseInt(document.getElementById('fertItem2Level').value) || 1;
+  var symAdj = parseInt(document.getElementById('fertSymAdj').value) || 0;
+  var diceMode = document.getElementById('fertDiceMode').value || 'c';
+  var sandN = parseInt(document.getElementById('fertSandN').value) || 1;
+  var fertWater = parseInt(document.getElementById('fertWaterCount').value) || 1;
+  var fertPest = parseInt(document.getElementById('fertPestCount').value) || 1;
+
+  // Level-specific notes
+  var fn1 = document.getElementById('fert-note-item1-lv');
+  if (item1 === 'speedBell') fn1.textContent = '缩短 ' + ((lv1+1)*15) + ' 分钟 (' + ((lv1+1)*0.25).toFixed(2) + 'h)';
+  else if (item1 === 'symbiotic') fn1.textContent = '相邻作物每棵 +' + lv1 + ' 产量';
+  else if (item1 === 'harvestDice') fn1.textContent = '触发时总产量 × (1 + ' + (lv1*5) + '%)';
+  else fn1.textContent = '';
+
+  var fn2 = document.getElementById('fert-note-item2-lv');
+  if (item2 === 'gourd') fn2.textContent = '额外 +' + (lv2+1) + ' 产量（成熟后+2h）';
+  else if (item2 === 'sandglass') fn2.textContent = '每次清除：基础产量 × ' + sandglassPcts[lv2] + '%（四舍五入）';
+  else if (item2 === 'brush') fn2.textContent = lv2 === 1 ? 'Lv1: 白菜+1产+1价, 萝卜-0.6h, 辣椒+1价, 甘蔗+2h+6产' : 'Lv2: 白菜+3产+2价, 萝卜-1.7h, 辣椒+3价, 甘蔗+2h+14产';
+  else fn2.textContent = '';
 
   var baseTime = crop.time;
   var baseYield = crop.yield;
-  var price = crop.price;
-  var seedCost = crop.cost;
+  var basePrice = crop.price;
 
-  if (bellLv > 0) { baseTime -= (bellLv + 1) * 0.25; }
+  // 如意笔: override base stats
+  if (item2 === 'brush' && brushStats[lv2] && brushStats[lv2][crop.key]) {
+    var b = brushStats[lv2][crop.key];
+    baseTime = b.time;
+    baseYield = b.yield;
+    basePrice = b.price;
+  }
 
-  var gourdBonusTime = gourdLv > 0 ? 2 : 0;
-  if (gourdLv > 0) { baseYield += (gourdLv + 1); }
+  // Save raw base yield for sandglass (before farm ops modify it)
+  var rawBaseYield = baseYield;
 
-  var coreTime = baseTime;
+  // Farm operations
+  baseTime -= fertWater * 1;
+  baseYield += fertPest * 1;
+
+  // Apply item1 (non-dice)
+  if (item1 === 'speedBell') {
+    baseTime -= (lv1 + 1) * 0.25;
+  } else if (item1 === 'symbiotic') {
+    if (symAdj > 0) baseYield += lv1;
+  }
+
+  // Apply item2
+  var gourdBonusTime = 0;
+  if (item2 === 'gourd') {
+    gourdBonusTime = 2;
+    baseYield += (lv2 + 1);
+  } else if (item2 === 'sandglass') {
+    baseYield += Math.round(rawBaseYield * (sandglassPcts[lv2] / 100)) * sandN;
+  }
+
+  // Apply item1 dice: multiplier on total yield (after all other additions)
+  if (item1 === 'harvestDice') {
+    var diceP = (diceMode === 'c') ? 1.0 : (1 - Math.pow(0.6, parseInt(diceMode) || 2));
+    baseYield = Math.round(baseYield * (1 + diceP * 0.05 * lv1));
+  }
+
+  var coreTime = Math.max(0.25, baseTime);
 
   var rows = [];
   var n = 0;
   while (true) {
-    var core = Math.max(0.25, coreTime - n);
+    var core = Math.max(0.25, baseTime - n);
     var t = core + gourdBonusTime;
     var fertCost = n * 25;
-    var netProfitPerH = (baseYield * price - fertCost - seedCost) / t;
+    var netProfitPerH = (baseYield * basePrice - fertCost - crop.cost) / t;
     rows.push({ n: n, time: t, fertCost: fertCost, netProfitPerH: netProfitPerH });
     if (core <= 0.25) break;
     n++;
@@ -1024,16 +1302,25 @@ function init() {
   document.getElementById('item2').addEventListener('change', updateCalculator);
   document.getElementById('item2Level').addEventListener('change', updateCalculator);
   document.getElementById('sandglassN').addEventListener('change', updateCalculator);
+  document.getElementById('diceMode').addEventListener('change', updateCalculator);
 
   document.querySelectorAll('#comboControls select').forEach(function(el) {
     el.addEventListener('change', generateComboTable);
   });
+
+  // Global settings affect both tables
+  document.getElementById('compClearCnt').addEventListener('change', function() { generateComboTable(); generateMaxLevelTable(); });
+  document.getElementById('compDiceMode').addEventListener('change', function() { generateComboTable(); generateMaxLevelTable(); });
+  document.getElementById('compWaterCount').addEventListener('change', function() { generateComboTable(); generateMaxLevelTable(); });
+  document.getElementById('compPestCount').addEventListener('change', function() { generateComboTable(); generateMaxLevelTable(); });
+  document.getElementById('compSymbLayout').addEventListener('change', function() { generateComboTable(); generateMaxLevelTable(); });
 
   updateCalculator();
   generateComboTable();
   generateMaxLevelTable();
   buildThiefPlots();
   updateThief();
+  updateFertUI();
   calcFertilizer();
 }
 

@@ -442,7 +442,7 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
       </table></div>
       <div class="note" style="margin-top:14px;">
         * 时间最低限制为0.25小时(15分钟)。结果已按总利润/h降序排列。<br>
-        <sup style="color:var(--accent);">*</sup> 暴击产量 = round( (基础 + 沙漏 + 葫 + 共生苗) × 2 + 除虫 ) × (1 + 骰子%) 。目前仅验证了沙漏和除虫（沙漏参与翻倍，除虫在翻倍后加），共生苗、葫和骰子是否也按此公式计算待实测确认。
+        <sup style="color:var(--accent);">*</sup> 暴击：种下瞬间触发（有特效），基础产量直接翻倍。暴击产量 =（翻倍产量 + 沙漏加成 + 共生苗加成 + 葫加成 + 除虫加成）×（1 + 骰子%），结果向上取整。目前仅验证了暴击后沙漏的情况：沙漏加成 = 向上取整（翻倍产量 × 等级%）× 清除次数。暴击下共生苗、葫和骰子尚未实测验证，后续可能调整。
       </div>
     </div>
   </div>
@@ -698,24 +698,23 @@ function calcCropStats(crop, item1, lv1, item2, lv2, sandN, symAdjCount, diceMod
     t += 2;
     y += (lv2 + 1);
   } else if (item2 === 'sandglass') {
-    y += Math.round(baseYield * (sandglassPcts[lv2] / 100)) * sandN;
+    y += Math.ceil(baseYield * (sandglassPcts[lv2] / 100)) * sandN;
   }
 
   // Cat1 dice: multiplier on total yield (applied AFTER all other additions)
   if (item1 === 'harvestDice') {
     var diceP = (diceMode === 'c') ? 1.0 : (1 - Math.pow(0.6, parseInt(diceMode) || 2));
-    y = Math.round(y * (1 + diceP * 0.05 * lv1));
+    y = Math.ceil(y * (1 + diceP * 0.05 * lv1));
   }
 
-  // Crit (double) yield: (base + sandglass + gourd + symbiotic) ×2 + pest, then dice
-  var yCrit = baseYield;
-  if (item1 === 'symbiotic' && symAdjCount > 0) yCrit += lv1;  // 非叠加
+  // Crit: base doubles at plant time, sandglass re-calculates on doubled base (ceil), pest adds last
+  var yCrit = baseYield * 2;  // 暴击：种下瞬间基础产量翻倍
+  yCrit += (pestCount || 0) * 1;  // 除虫在翻倍后加
+  if (item1 === 'symbiotic' && symAdjCount > 0) yCrit += lv1;  // 共生苗，非叠加
   if (item2 === 'gourd') yCrit += (lv2 + 1);
-  if (item2 === 'sandglass') yCrit += Math.round(baseYield * (sandglassPcts[lv2] / 100)) * sandN;
-  yCrit = yCrit * 2;  // double: (base + all growth bonuses) × 2
-  yCrit += (pestCount || 0) * 1;  // pest added after double
+  if (item2 === 'sandglass') yCrit += Math.ceil((baseYield * 2) * (sandglassPcts[lv2] / 100)) * sandN;  // 沙漏在翻倍的基数上重新ceil
   if (item1 === 'harvestDice') {
-    yCrit = Math.round(yCrit * (1 + diceP * 0.05 * lv1));
+    yCrit = Math.ceil(yCrit * (1 + diceP * 0.05 * lv1));
   }
 
   if (t < 0.25) t = 0.25;
@@ -805,7 +804,7 @@ function updateCalculator() {
 
   var noteLv2 = document.getElementById('note-item2-lv');
   if (item2 === 'gourd') noteLv2.textContent = '额外 +' + (lv2+1) + ' 产量（成熟后+2h）';
-  else if (item2 === 'sandglass') noteLv2.textContent = '每次清除：基础产量 × ' + sandglassPcts[lv2] + '%（四舍五入）';
+  else if (item2 === 'sandglass') noteLv2.textContent = '每次清除：基础产量 × ' + sandglassPcts[lv2] + '%（向上取整）';
   else noteLv2.textContent = '';
 
   // Brush note
@@ -1117,7 +1116,7 @@ function calcFertilizer() {
 
   var fn2 = document.getElementById('fert-note-item2-lv');
   if (item2 === 'gourd') fn2.textContent = '额外 +' + (lv2+1) + ' 产量（成熟后+2h）';
-  else if (item2 === 'sandglass') fn2.textContent = '每次清除：基础产量 × ' + sandglassPcts[lv2] + '%（四舍五入）';
+  else if (item2 === 'sandglass') fn2.textContent = '每次清除：基础产量 × ' + sandglassPcts[lv2] + '%（向上取整）';
   else if (item2 === 'brush') fn2.textContent = lv2 === 1 ? 'Lv1: 白菜+1产+1价, 萝卜-0.6h, 辣椒+1价, 甘蔗+2h+6产' : 'Lv2: 白菜+3产+2价, 萝卜-1.7h, 辣椒+3价, 甘蔗+2h+14产';
   else fn2.textContent = '';
 
@@ -1153,13 +1152,13 @@ function calcFertilizer() {
     gourdBonusTime = 2;
     baseYield += (lv2 + 1);
   } else if (item2 === 'sandglass') {
-    baseYield += Math.round(rawBaseYield * (sandglassPcts[lv2] / 100)) * sandN;
+    baseYield += Math.ceil(rawBaseYield * (sandglassPcts[lv2] / 100)) * sandN;
   }
 
   // Apply item1 dice: multiplier on total yield (after all other additions)
   if (item1 === 'harvestDice') {
     var diceP = (diceMode === 'c') ? 1.0 : (1 - Math.pow(0.6, parseInt(diceMode) || 2));
-    baseYield = Math.round(baseYield * (1 + diceP * 0.05 * lv1));
+    baseYield = Math.ceil(baseYield * (1 + diceP * 0.05 * lv1));
   }
 
   var coreTime = Math.max(0.25, baseTime);

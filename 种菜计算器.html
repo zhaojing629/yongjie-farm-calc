@@ -781,7 +781,7 @@ function updateCalculator() {
   var lv1 = parseInt(document.getElementById('item1Level').value) || 1;
   var item2 = document.getElementById('item2').value;
   var lv2 = (item2 === 'brush') ? parseInt(document.getElementById('brushLevel').value) || 1 : parseInt(document.getElementById('item2Level').value) || 1;
-  var sandN = parseInt(document.getElementById('sandglassN').value) || 1;
+  var sandN = parseInt(document.getElementById('sandglassN').value) ?? 1;
   var diceMode = document.getElementById('diceMode').value || 'c';
   var waterCount = parseInt(document.getElementById('waterCount').value) || 0;
   var pestCount = parseInt(document.getElementById('pestCount').value) || 0;
@@ -1128,7 +1128,7 @@ function calcFertilizer() {
   var lv2 = parseInt(document.getElementById('fertItem2Level').value) || 1;
   var symAdj = parseInt(document.getElementById('fertSymAdj').value) || 0;
   var diceMode = document.getElementById('fertDiceMode').value || 'c';
-  var sandN = parseInt(document.getElementById('fertSandN').value) || 1;
+  var sandN = parseInt(document.getElementById('fertSandN').value) ?? 1;
   var fertWater = parseInt(document.getElementById('fertWaterCount').value) || 1;
   var fertPest = parseInt(document.getElementById('fertPestCount').value) || 1;
 

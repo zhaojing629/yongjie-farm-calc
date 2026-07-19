@@ -186,6 +186,30 @@ body.dark td.global-best { color: #f87171; background: rgba(239,68,68,0.15); }
 }
 body.dark .layout-diagram { background: rgba(255,255,255,0.03); }
 
+/* ========== SYMBIOTIC GRID ========== */
+.sym-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; max-width: 180px; margin-top: 4px; }
+.sym-cell {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--border); border-radius: var(--radius-sm);
+  cursor: pointer; font-size: 22px; user-select: none;
+  transition: all .15s; background: var(--card);
+}
+.sym-cell:hover { border-color: var(--input-focus); transform: scale(1.05); }
+.sym-cell.cane { background: #ecfdf5; border-color: #34d399; }
+.sym-cell.bonus { box-shadow: inset 0 0 0 3px rgba(5,150,105,0.25); }
+body.dark .sym-cell.cane { background: rgba(5,150,105,0.15); }
+body.dark .sym-cell.bonus { box-shadow: inset 0 0 0 3px rgba(52,211,153,0.35); }
+.sym-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.sym-preset {
+  padding: 4px 10px; border-radius: 14px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text); cursor: pointer;
+  font-size: 12px; font-family: var(--font); transition: all .15s;
+}
+.sym-preset:hover { border-color: var(--text2); }
+.sym-preset.active { background: var(--highlight); color: #fff; border-color: var(--highlight); }
+.sym-legend { font-size: 11px; color: var(--text2); margin-top: 6px; display: flex; gap: 10px; }
+.sym-label { font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 2px; text-align: center; }
+
 /* ========== COMBO CONTROLS ========== */
 .combo-controls {
   display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
@@ -359,16 +383,26 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
           <div class="note">作物生长时间越短、好友越少 → 触发率偏低（接近64%）。作物生长时间越长、好友越多 → 可按100%必定触发来算。</div>
         </div>
         <div class="form-group" id="symbioticGroup" style="display:none;">
-          <label>🌿 共生苗布局（a棵甘蔗 + 6−a棵其他）</label>
-          <select id="symbioticLayout" onchange="updateCalculator()">
-            <option value="1">1🎋+5🌱 (中排C/D, 3/6加成)</option>
-            <option value="2" selected>2🎋+4🌱 (中排C+D, 6/6全覆盖) ⭐推荐</option>
-            <option value="3">3🎋+3🌱 (串连, 6/6全覆盖)</option>
-            <option value="4">4🎋+2🌱 (6/6全覆盖)</option>
-            <option value="5">5🎋+1🌱 (6/6全覆盖)</option>
-            <option value="6">全🎋×6</option>
-          </select>
-          <div class="layout-diagram" id="symbioticDiagram" style="margin-top:8px;"></div>
+          <label>🌿 共生苗布局（点击方块切换🎋/🌱）</label>
+          <div class="sym-grid" id="symGrid">
+            <div class="sym-cell" data-pos="A" onclick="toggleSymCell('A')">🌱</div>
+            <div class="sym-cell" data-pos="B" onclick="toggleSymCell('B')">🌱</div>
+            <div class="sym-cell cane" data-pos="C" onclick="toggleSymCell('C')">🎋</div>
+            <div class="sym-cell cane" data-pos="D" onclick="toggleSymCell('D')">🎋</div>
+            <div class="sym-cell" data-pos="E" onclick="toggleSymCell('E')">🌱</div>
+            <div class="sym-cell" data-pos="F" onclick="toggleSymCell('F')">🌱</div>
+          </div>
+          <div class="sym-presets">
+            <button class="sym-preset" onclick="setSymPreset(1)">1🎋+5🌱</button>
+            <button class="sym-preset active" onclick="setSymPreset(2)">2🎋+4🌱 ⭐</button>
+            <button class="sym-preset" onclick="setSymPreset(3)">3🎋+3🌱</button>
+            <button class="sym-preset" onclick="setSymPreset(4)">4🎋+2🌱</button>
+            <button class="sym-preset" onclick="setSymPreset(5)">5🎋+1🌱</button>
+            <button class="sym-preset" onclick="setSymPreset(6)">全🎋×6</button>
+          </div>
+          <div class="sym-legend">
+            <span>🟢 绿底 = 🎋甘蔗</span><span>✨ 高亮内框 = 获得加成</span>
+          </div>
         </div>
       </div>
       <!-- Card 2: 第二类道具 -->
@@ -395,7 +429,7 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
         <div class="form-group" id="sandglassGroup">
           <label>⏳ 净化沙漏：预计清除异常次数</label>
           <select id="sandglassN">
-            <option value="0">0 次</option><option value="1">1 次</option><option value="2" selected>2 次</option><option value="3">3 次</option><option value="4">4 次</option>
+            <option value="0">0 次</option><option value="1">1 次</option><option value="2" selected>2 次</option><option value="3">3 次</option><option value="4">4 次</option><option value="5">5 次</option><option value="6">6 次</option><option value="7">7 次</option><option value="8">8 次</option>
           </select>
           <div class="note">种植时间越长，触发频率可能越高（如甘蔗比小麦更容易触发），但即使是甘蔗也有可能1次都不触发，可自行估测次数</div>
         </div>
@@ -436,7 +470,7 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
       <div class="panel">
         <h2>📈 当前配置收益结果</h2>
       <div class="table-wrap"><table>
-        <thead><tr><th>作物</th><th>实际耗时 (h)</th><th>预期产量</th><th>暴击产量 <sup style="color:var(--accent);">*</sup></th><th>单次利润 (¥)</th><th>每小时利润 (¥/h)</th><th>6块地总利润/h</th></tr></thead>
+        <thead><tr id="resultThead"><th>作物</th><th>实际耗时 (h)</th><th>预期产量</th><th>暴击产量 <sup style="color:var(--accent);">*</sup></th><th>单次利润 (¥)</th><th>每小时利润 (¥/h)</th><th>6块地总利润/h</th></tr></thead>
         <tbody id="resultTable"></tbody>
       </table></div>
       <div class="note" id="resultNote" style="margin-top:14px;">
@@ -597,7 +631,7 @@ body.dark .fert-row { background: rgba(255,255,255,0.02); }
       <div class="form-group" style="margin-bottom:0;min-width:130px;" id="fertSandGroup" hidden>
         <label>⏳ 清除异常次数</label>
         <select id="fertSandN" onchange="calcFertilizer()">
-          <option value="0">0 次</option><option value="1">1 次</option><option value="2" selected>2 次</option><option value="3">3 次</option><option value="4">4 次</option>
+          <option value="0">0 次</option><option value="1">1 次</option><option value="2" selected>2 次</option><option value="3">3 次</option><option value="4">4 次</option><option value="5">5 次</option><option value="6">6 次</option><option value="7">7 次</option><option value="8">8 次</option>
         </select>
       </div>
       <div class="form-group" style="margin-bottom:0;min-width:85px;" id="fertBrushGroup" hidden>
@@ -760,19 +794,103 @@ function switchTab(name) {
   if (name === 'thief') updateThief();
 }
 
-// ===================== SYMBIOTIC DIAGRAM =====================
-function updateSymbioticDiagram() {
-  var a = parseInt(document.getElementById('symbioticLayout').value) || 2;
-  var diagrams = {
-    1: '│ 🌱 │ 🌱 │\n│ 🎋 │ 🌱 │\n│ 🌱 │ 🌱 │\n⚠ 仅3/6加成：B,C,F获得加成',
-    2: '│ 🌱 │ 🌱 │\n│ 🎋 │ 🎋 │\n│ 🌱 │ 🌱 │\n✅ 2🎋中排, 6/6全覆盖 ⭐推荐',
-    3: '│ 🎋 │ 🌱 │\n│ 🎋 │ 🌱 │\n│ 🎋 │ 🌱 │\n✅ 左列串连, 6/6全覆盖',
-    4: '│ 🌱 │ 🌱 │\n│ 🎋 │ 🎋 │\n│ 🎋 │ 🎋 │\n✅ 6/6全覆盖',
-    5: '│ 🌱 │ 🎋 │\n│ 🎋 │ 🎋 │\n│ 🎋 │ 🎋 │\n✅ 6/6全覆盖',
-    6: '│ 🎋 │ 🎋 │\n│ 🎋 │ 🎋 │\n│ 🎋 │ 🎋 │\n✅ 全甘蔗, 6/6全覆盖'
-  };
-  var d = diagrams[a] || diagrams[2];
-  document.getElementById('symbioticDiagram').innerHTML = '<pre style=\"margin:0;line-height:1.6;\">' + d + '</pre>';
+// ===================== SYMBIOTIC GRID =====================
+// Grid layout: A B / C D / E F
+var SYM_ADJ = {
+  A: ['B','C'], B: ['A','D'], C: ['A','D','E'],
+  D: ['B','C','F'], E: ['C','F'], F: ['D','E']
+};
+
+// Preset optimal layouts (from 共生苗详解.md)
+var SYM_PRESETS = {
+  1: 'OOOCOO', 2: 'OOCCOO', 3: 'COCOCO',
+  4: 'OOCCCC', 5: 'OCCCCC', 6: 'CCCCCC'
+};
+
+function getSymLayout() {
+  var s = '';
+  var poses = ['A','B','C','D','E','F'];
+  for (var i = 0; i < poses.length; i++) {
+    var cell = document.querySelector('#symGrid .sym-cell[data-pos="' + poses[i] + '"]');
+    s += cell.classList.contains('cane') ? 'C' : 'O';
+  }
+  return s;
+}
+
+function computeSymBonus() {
+  // Returns {A:bool, ...} — whether each plot gets symbiotic bonus
+  var layout = getSymLayout();
+  var bonus = {};
+  var poses = ['A','B','C','D','E','F'];
+  for (var i = 0; i < poses.length; i++) {
+    var p = poses[i];
+    var isCane = layout[i] === 'C';
+    var adj = SYM_ADJ[p];
+    var hasAdjSame = false;
+    for (var j = 0; j < adj.length; j++) {
+      var ai = poses.indexOf(adj[j]);
+      if (layout[ai] === 'C') { hasAdjSame = true; break; }
+    }
+    // A plot gets bonus if it's adjacent to at least 1 cane
+    bonus[p] = hasAdjSame;
+  }
+  return bonus;
+}
+
+function toggleSymCell(pos) {
+  var cell = document.querySelector('#symGrid .sym-cell[data-pos="' + pos + '"]');
+  cell.classList.toggle('cane');
+  cell.textContent = cell.classList.contains('cane') ? '🎋' : '🌱';
+  updateSymGrid();
+  updateCalculator();
+}
+
+function setSymPreset(n) {
+  var layout = SYM_PRESETS[n] || SYM_PRESETS[2];
+  var poses = ['A','B','C','D','E','F'];
+  for (var i = 0; i < poses.length; i++) {
+    var cell = document.querySelector('#symGrid .sym-cell[data-pos="' + poses[i] + '"]');
+    if (layout[i] === 'C') {
+      cell.classList.add('cane');
+      cell.textContent = '🎋';
+    } else {
+      cell.classList.remove('cane');
+      cell.textContent = '🌱';
+    }
+  }
+  // Update preset button active state
+  var btns = document.querySelectorAll('.sym-preset');
+  for (var b = 0; b < btns.length; b++) btns[b].classList.remove('active');
+  var targetBtn = document.querySelectorAll('.sym-preset')[n-1];
+  if (targetBtn) targetBtn.classList.add('active');
+  updateSymGrid();
+  updateCalculator();
+}
+
+function updateSymGrid() {
+  var bonus = computeSymBonus();
+  var poses = ['A','B','C','D','E','F'];
+  var caneCount = 0;
+  for (var i = 0; i < poses.length; i++) {
+    var cell = document.querySelector('#symGrid .sym-cell[data-pos="' + poses[i] + '"]');
+    if (cell.classList.contains('cane')) caneCount++;
+    if (bonus[poses[i]]) {
+      cell.classList.add('bonus');
+    } else {
+      cell.classList.remove('bonus');
+    }
+  }
+  // Update preset button active state
+  var layout = getSymLayout();
+  var btns = document.querySelectorAll('.sym-preset');
+  for (var b = 0; b < btns.length; b++) btns[b].classList.remove('active');
+  for (var key in SYM_PRESETS) {
+    if (SYM_PRESETS[key] === layout) {
+      var btn = btns[parseInt(key)-1];
+      if (btn) btn.classList.add('active');
+      break;
+    }
+  }
 }
 
 // ===================== LEFT CALCULATOR =====================
@@ -794,14 +912,14 @@ function updateCalculator() {
   document.getElementById('item1LevelGroup').style.display = (item1 === 'none') ? 'none' : '';
   document.getElementById('item2LevelGroup').style.display = (item2 === 'none' || item2 === 'brush') ? 'none' : '';
 
-  // Update symbiotic layout diagram
-  if (item1 === 'symbiotic') updateSymbioticDiagram();
+  // Update symbiotic grid
+  if (item1 === 'symbiotic') updateSymGrid();
 
   // Notes
   var note1 = document.getElementById('note-item1');
   if (item1 === 'none') note1.textContent = '';
   else if (item1 === 'speedBell') note1.textContent = '缩短生长时间 (等级+1)×15分钟。';
-  else if (item1 === 'symbiotic') note1.innerHTML = '与甘蔗相邻的作物获得 +等级 产量（不可叠加）。因作物时间不统一，无法给出单一耗时/产量，按每块地利润/h之和计算。布局与收益详见 <a href="https://github.com/zhaojing629/yongjie-farm-calc/blob/main/%E5%85%B1%E7%94%9F%E8%8B%97%E8%AF%A6%E8%A7%A3.md" target="_blank">共生苗详解.md</a>';
+  else if (item1 === 'symbiotic') note1.innerHTML = '与甘蔗相邻的作物获得 +等级 产量（不可叠加）。每块地独立计算，总利润/h = 各地块利润/h之和。详见 <a href="https://github.com/zhaojing629/yongjie-farm-calc/blob/main/%E5%85%B1%E7%94%9F%E8%8B%97%E8%AF%A6%E8%A7%A3.md" target="_blank">共生苗详解.md</a>';
   else if (item1 === 'harvestDice') note1.textContent = '种植/收获/清除异常/被偷菜等行为有40%概率触发，仅生效1次。';
 
   var note2 = document.getElementById('note-item2');
@@ -833,40 +951,50 @@ function updateCalculator() {
   var results = [];
 
   if (item1 === 'symbiotic') {
-    // ===== SYMBIOTIC MODE: per-plot profit/h sum (see 共生苗详解.md 四) =====
-    var a = parseInt(document.getElementById('symbioticLayout').value) || 2;
-    
-    if (a === 6) {
-      // 全甘蔗×6 — all cane get bonus (adjacent to each other)
-      var caneAll = calcCropStats(crops[4], item1, lv1, item2, lv2, sandN, 1, diceMode, waterCount, pestCount);
-      results.push({ type: 'pure', name: '全🎋×6', stats: caneAll });
-    } else {
-      // Cane stats: with bonus if a>=2 (adjacent to another cane), no bonus if a=1
-      var caneSymAdj = (a >= 2) ? 1 : 0;
-      var caneStats = calcCropStats(crops[4], item1, lv1, item2, lv2, sandN, caneSymAdj, diceMode, waterCount, pestCount);
-      
-      for (var j = 0; j < 4; j++) {
-        var other = crops[j];
-        var totalPph;
-        
-        if (a === 1) {
-          // a=1: 1 cane(no bonus) + 3 crop(with bonus) + 2 crop(no bonus)
-          var cropBonus = calcCropStats(other, item1, lv1, item2, lv2, sandN, 1, diceMode, waterCount, pestCount);
-          var cropNoBonus = calcCropStats(other, item1, lv1, item2, lv2, sandN, 0, diceMode, waterCount, pestCount);
-          totalPph = caneStats.pph + 3 * cropBonus.pph + 2 * cropNoBonus.pph;
-        } else {
-          // a>=2: a cane(with bonus) + (6-a) crop(with bonus), all 6/6 coverage
-          var cropAll = calcCropStats(other, item1, lv1, item2, lv2, sandN, 1, diceMode, waterCount, pestCount);
-          totalPph = a * caneStats.pph + (6 - a) * cropAll.pph;
-        }
-        
-        results.push({
-          type: 'symbiotic',
-          name: '🌿 ' + a + '🎋 + ' + (6-a) + other.emoji + other.name,
-          totalPph: totalPph,
-          perPlotPph: totalPph / 6
-        });
+    // ===== SYMBIOTIC MODE: per-plot profit/h sum (see 共生苗详解.md) =====
+    var bonus = computeSymBonus();
+    var poses = ['A','B','C','D','E','F'];
+    var layoutStr = getSymLayout();
+
+    for (var j = 0; j < 4; j++) {
+      var other = crops[j];
+      var groups = [];
+      var totalPph = 0;
+
+      // Count cane/crop by bonus status from the actual grid layout
+      var caneWBon = 0, caneNBon = 0, cropWBon = 0, cropNBon = 0;
+      for (var pi = 0; pi < poses.length; pi++) {
+        var isCane = layoutStr[pi] === 'C';
+        var hasB = bonus[poses[pi]];
+        if (isCane) { if (hasB) caneWBon++; else caneNBon++; }
+        else        { if (hasB) cropWBon++; else cropNBon++; }
       }
+
+      if (caneWBon > 0) {
+        var s = calcCropStats(crops[4], item1, lv1, item2, lv2, sandN, 1, diceMode, waterCount, pestCount);
+        groups.push({ label: '🎋 甘蔗(有加成)', n: caneWBon, stats: s });
+        totalPph += caneWBon * s.pph;
+      }
+      if (caneNBon > 0) {
+        var s = calcCropStats(crops[4], item1, lv1, item2, lv2, sandN, 0, diceMode, waterCount, pestCount);
+        groups.push({ label: '🎋 甘蔗(无加成)', n: caneNBon, stats: s });
+        totalPph += caneNBon * s.pph;
+      }
+      if (cropWBon > 0) {
+        var s = calcCropStats(other, item1, lv1, item2, lv2, sandN, 1, diceMode, waterCount, pestCount);
+        groups.push({ label: other.emoji + ' ' + other.name + '(有加成)', n: cropWBon, stats: s });
+        totalPph += cropWBon * s.pph;
+      }
+      if (cropNBon > 0) {
+        var s = calcCropStats(other, item1, lv1, item2, lv2, sandN, 0, diceMode, waterCount, pestCount);
+        groups.push({ label: other.emoji + ' ' + other.name + '(无加成)', n: cropNBon, stats: s });
+        totalPph += cropNBon * s.pph;
+      }
+
+      var caneCount = caneWBon + caneNBon;
+      var cropCount = cropWBon + cropNBon;
+      var title = '🌿 ' + caneCount + '🎋 + ' + cropCount + other.emoji + other.name;
+      results.push({ type: 'symbiotic', name: title, groups: groups, totalPph: totalPph });
     }
   } else {
     // ===== NORMAL MODE: pure planting for each crop =====
@@ -885,14 +1013,49 @@ function updateCalculator() {
   });
 
   // ===== RENDER =====
+  // Switch header for symbiotic vs pure mode
+  var theadRow = document.getElementById('resultThead');
+  if (item1 === 'symbiotic') {
+    theadRow.innerHTML = '<th>品种组成</th><th>地块</th><th>耗时 (h)</th><th>产量</th><th>利润/h</th><th>小计利润/h</th>';
+  } else {
+    theadRow.innerHTML = '<th>作物</th><th>实际耗时 (h)</th><th>预期产量</th><th>暴击产量 <sup style="color:var(--accent);">*</sup></th><th>单次利润 (¥)</th><th>每小时利润 (¥/h)</th><th>6块地总利润/h</th>';
+  }
+
   var tbody = document.getElementById('resultTable');
   tbody.innerHTML = '';
 
   for (var ri = 0; ri < results.length; ri++) {
     var r = results[ri];
-    var tr = document.createElement('tr');
+    var tr;
 
-    if (r.type === 'pure') {
+    if (r.type === 'symbiotic') {
+      // Render group sub-rows
+      for (var gi = 0; gi < r.groups.length; gi++) {
+        var g = r.groups[gi];
+        var subTr = document.createElement('tr');
+        subTr.innerHTML =
+          '<td style="padding-left:16px;text-align:left;">' + g.label + '</td>' +
+          '<td>' + g.n + '块</td>' +
+          '<td>' + g.stats.time.toFixed(2) + ' h</td>' +
+          '<td>' + g.stats.yield.toFixed(0) + '</td>' +
+          '<td>¥' + g.stats.pph.toFixed(2) + '/h</td>' +
+          '<td class="highlight">¥' + (g.n * g.stats.pph).toFixed(2) + '/h</td>';
+        tbody.appendChild(subTr);
+      }
+      // Total row
+      var totalN = 0;
+      for (var gi2 = 0; gi2 < r.groups.length; gi2++) totalN += r.groups[gi2].n;
+      tr = document.createElement('tr');
+      tr.style.borderTop = '2px solid var(--border)';
+      tr.innerHTML =
+        '<td style="text-align:left;"><b>' + r.name + '</b></td>' +
+        '<td><b>' + totalN + '块</b></td>' +
+        '<td>—</td><td>—</td><td>—</td>' +
+        '<td class="highlight"><b>¥' + r.totalPph.toFixed(2) + '/h</b></td>';
+      tbody.appendChild(tr);
+    } else {
+      // Pure mode rows (unchanged)
+      tr = document.createElement('tr');
       var testStyle = r.isTest ? ' style="color:var(--accent);"' : '';
       var noteHtml = r.note ? '<br><small style="color:var(--text2);">(' + r.note + ')</small>' : '';
       var yieldHtml, critYieldHtml;
@@ -911,18 +1074,8 @@ function updateCalculator() {
         '<td>¥' + r.stats.profit.toFixed(2) + '</td>' +
         '<td class="highlight">¥' + r.stats.pph.toFixed(2) + '/h</td>' +
         '<td class="highlight">¥' + (r.stats.pph * 6).toFixed(2) + '/h</td>';
-    } else {
-      // Symbiotic row: same columns as pure, showing per-plot and 6-plot total
-      tr.innerHTML =
-        '<td><b>' + r.name + '</b></td>' +
-        '<td>—</td>' +
-        '<td>—</td>' +
-        '<td>—</td>' +
-        '<td>—</td>' +
-        '<td class="highlight">¥' + r.perPlotPph.toFixed(2) + '/h</td>' +
-        '<td class="highlight">¥' + r.totalPph.toFixed(2) + '/h</td>';
+      tbody.appendChild(tr);
     }
-    tbody.appendChild(tr);
   }
   // 骰子产量脚注
   document.getElementById('diceFootnote').style.display = (item1 === 'harvestDice') ? '' : 'none';
